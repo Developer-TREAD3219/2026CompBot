@@ -3,6 +3,7 @@
 // the WPILib BSD license file in the root directory of this project.
 
 package frc.robot;
+
 // imports for Rev Robotics MaxSwerve
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
@@ -27,7 +28,8 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import java.util.List;
 
 // other imports
-
+import com.ctre.phoenix6.CANBus;
+import com.ctre.phoenix6.hardware.Pigeon2;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -36,8 +38,14 @@ import java.util.List;
  * subsystems, commands, and trigger mappings) should be declared here.
  */
 public class RobotContainer {
+    
+  public CANBus m_CanBus = new CANBus();
+  public Pigeon2 m_Pigeon = new Pigeon2(Constants.SensorConstants.kPigeonCanId, m_CanBus);
+    
   // The robot's subsystems and commands are defined here...
-  private final DriveSubsystem m_robotDrive = new DriveSubsystem();
+
+  //  MOVED TO INSIDE public RobotContainer(), because need to send pigeon as parameter.
+  private final DriveSubsystem m_robotDrive = new DriveSubsystem(m_Pigeon);
 
   // The driver's controller
   XboxController m_driverController = new XboxController(OIConstants.kDriverControllerPort);
