@@ -15,13 +15,12 @@ import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.AddressableLED;
-import edu.wpi.first.wpilibj.AddressableLEDBuffer;
 import edu.wpi.first.wpilibj.PS4Controller.Button;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.OIConstants;
 import frc.robot.subsystems.DriveSubsystem;
+import frc.robot.subsystems.TreadLeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
@@ -43,12 +42,10 @@ import java.util.List;
 public class RobotContainer {
     // The robot's subsystems and commands are defined here...
     private final DriveSubsystem m_robotDrive = new DriveSubsystem();
+    private final TreadLeds m_TreadLeds = new TreadLeds();
 
     // The driver's controller
     XboxController m_driverController = new XboxController(OIConstants.kDriverControllerPort);
-
-    AddressableLED m_led = new AddressableLED(9);
-    AddressableLEDBuffer m_ledBuffer = new AddressableLEDBuffer(60);
 
     /**
      * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -56,8 +53,7 @@ public class RobotContainer {
     public RobotContainer() {
         // Configure the button bindings
         configureButtonBindings();
-        m_led.setLength(m_ledBuffer.getLength());
-        m_led.start();
+
         // Configure default commands
         m_robotDrive.setDefaultCommand(
                 // The left stick controls translation of the robot.
