@@ -100,4 +100,12 @@ public final class Constants {
   public static final class NeoMotorConstants {
     public static final double kFreeSpeedRpm = 5676;
   }
+
+  public static final class VisionConstants {
+    public static final String kCameraName = "April";
+  }
+
+  public static final class SensorConstants {
+    public static final int kPigeonCanId = 15;
+  }
 }
