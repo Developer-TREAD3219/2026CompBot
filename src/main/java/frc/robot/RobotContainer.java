@@ -21,12 +21,16 @@ import edu.wpi.first.wpilibj.PS4Controller.Button;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.OIConstants;
+import frc.robot.commands.LauncherCommands.Launch;
 import frc.robot.subsystems.DriveSubsystem;
+import frc.robot.subsystems.LauncherSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
+
 import java.util.List;
 
 // other imports
@@ -54,7 +58,8 @@ public class RobotContainer {
 
   // The driver's controller
   XboxController m_driverController = new XboxController(OIConstants.kDriverControllerPort);
-
+  XboxController m_gunnerController = new XboxController(OIConstants.kGunnerControllerPort);
+  
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
@@ -95,6 +100,18 @@ public class RobotContainer {
             () -> m_robotDrive.zeroHeading(),
             m_robotDrive));
   }
+
+//Check if dpad right is pressed on the gunner controller
+  public boolean launchRequested(){
+    return m_gunnerController.getRightTriggerAxis() > 0.9;
+  }
+
+  // Define the Trigger
+// Bind the Trigger to the setMotorSpeed
+{
+Trigger launchTrigger = new Trigger(this::launchRequested);
+launchTrigger.onTrue(new Launch());
+}
 
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.

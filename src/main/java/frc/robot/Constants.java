@@ -79,6 +79,7 @@ public final class Constants {
 
   public static final class OIConstants {
     public static final int kDriverControllerPort = 0;
+    public static final int kGunnerControllerPort = 0;
     public static final double kDriveDeadband = 0.05;
   }
 
@@ -107,5 +108,12 @@ public final class Constants {
 
   public static final class SensorConstants {
     public static final int kPigeonCanId = 15;
+  }
+
+  public static final class LauncherMotorConstants {
+    public static final int kLauncherMotorMaster = 10;
+    public static final int kLauncherMotorFollower = 10;
+
+    public static final double kLauncherMotorSpeed = 1.0;
   }
 }
