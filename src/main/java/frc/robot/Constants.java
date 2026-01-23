@@ -116,4 +116,42 @@ public final class Constants {
 
     public static final double kLauncherMotorSpeed = 1.0;
   }
+
+  public static final class LedConstants {
+    public static final int kPwmPort = 9;
+    public static final int kTotalLeds = 164; // 60 LEDs per Meter for 2.74 meters (27in x 4)
+  }
+
+  public static class States {
+    public enum State {
+      Initial,
+      Autonomous,
+      TeleopInPosition,
+      TeleopNotInPosition,
+      Launching,
+      Fueling,
+      Climbing
+    }
+
+    private State m_currentState;
+
+    States() {
+      m_currentState = State.Initial;
+    }
+
+    public void setState(State newState) {
+      m_currentState = newState;
+    }
+
+    public State getState() {
+      return m_currentState;
+    }
+
+    public State incrementState() {
+        State[] values = State.values();
+        State nextState = values[(m_currentState.ordinal() + 1) % values.length];
+        m_currentState = nextState;
+        return m_currentState;
+    }
+  }
 }
