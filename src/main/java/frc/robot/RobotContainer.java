@@ -106,60 +106,62 @@ public class RobotContainer {
         .onTrue(new InstantCommand(
             () -> m_robotDrive.zeroHeading(),
             m_robotDrive));
-
+    //Gunner Controls
     new JoystickButton(m_gunnerController, XboxController.Button.kA.value).onTrue(new RunCommand(() -> m_robotIntake.toggleIntake(), m_robotIntake));
     new JoystickButton(m_gunnerController, XboxController.Button.kB.value).whileTrue(new RunCommand(() -> m_robotTurret.setAllianceZoneLock(), m_robotTurret));
     new JoystickButton(m_gunnerController, XboxController.Button.kX.value).onTrue(new RunCommand(() -> m_robotClimber.toggleHookLatch(), m_robotClimber));
     new JoystickButton(m_gunnerController, XboxController.Button.kY.value).whileTrue(new RunCommand(() -> m_robotTurret.lockOntoHub(), m_robotTurret));
     new JoystickButton(m_gunnerController, XboxController.Button.kLeftBumper.value).whileTrue(new RunCommand(() -> m_robotIntake.reverseIntakeRollers(), m_robotIntake));
     new JoystickButton(m_gunnerController, XboxController.Button.kRightStick.value).whileTrue(new RunCommand(() -> m_robotTurret.aimLauncher(), m_robotTurret));
-    new JoystickButton(m_gunnerController, XboxController.Button.kDPadUp.value).whileTrue(new RunCommand(() -> m_robotClimber.extendClimber(), m_robotClimber));
-    new JoystickButton(m_gunnerController, XboxController.Button.kDPadDown.value).whileTrue(new RunCommand(() -> m_robotClimber.retractClimber(), m_robotClimber));
     new JoystickButton(m_gunnerController, XboxController.Button.kLeftTrigger.value).onTrue(new RunCommand(() -> m_robotIntake.startStopIntakeRollers(), m_robotIntake));
     new JoystickButton(m_gunnerController, XboxController.Button.kRightTrigger.value).whileTrue(new RunCommand(() -> m_robotTurret.launchFuel(), m_robotTurret));
     new JoystickButton(m_gunnerController, XboxController.Button.kStart.value).onTrue(new RunCommand(() -> m_robotTurret.startStopLauncherMotors(), m_robotTurret));
-    new JoystickButton(m_driverController, XboxController.Button.LeftJoystick.value).whileTrue(new RunCommand(() -> m_robotDrive.driveMotion(), m_robotDrive));
-    new JoystickButton(m_driverController, XboxController.Button.RightJoystick.value).whileTrue(new RunCommand(() -> m_robotDrive.driveRotation(), m_robotDrive));
+    //Driver Controls
     new JoystickButton(m_driverController, XboxController.Button.kLeftTrigger.value).whileTrue(new RunCommand(() -> m_robotDrive.brakeSlowDown(), m_robotDrive));
 
+    Trigger extendClimberTrigger = new Trigger(this::extendClimberRequested);
+    extendClimberTrigger.whileTrue(new RunCommand(() -> m_robotClimber.extendClimber(0.5), m_robotClimber));
+    extendClimberTrigger.onFalse(new RunCommand(() -> m_robotClimber.stopClimber(), m_robotClimber));
+
+    Trigger retractClimberTrigger = new Trigger(this::retractClimberRequested);
+    retractClimberTrigger.whileTrue(new RunCommand(() -> m_robotClimber.retractClimber(0.5), m_robotClimber));
+    retractClimberTrigger.onFalse(new RunCommand(() -> m_robotClimber.stopClimber(), m_robotClimber));
   }
 
-/* Gunner
+/*
  * A -> Extend/Retract Intake (toggle) DONE
  * B -> Track outpost with Limelight to shoot into alliance zone (hold) DONE
  * X -> Latch Hook on climber (toggle) DONE
  * Y -> Lock onto hub (hold)
  * LB -> Reverse Intake Rollers (hold)
- * RB -> 
+ * RB -> Unbinded
  * LeftJoystick -> 
  * LeftJoystickClick ->
  * RightJoystick -> Aim launcher
  * RightJoystickClick ->
  * DPad Up -> Climber extend (hold)
  * DPad Down -> Climber retract (hold)
- * DPad Left ->
- * DPad Right ->
+ * DPad Left -> Unbinded
+ * DPad Right -> Unbinded
  * LeftTrigger -> Start/stop Intake Rollers (toggle)
  * RightTrigger -> Launch fuel (hold)
  * StartButton -> Start/Stop launcher motors (toggle)
- * 
  */
-/* Driver
- * A -> 
- * B ->
- * X ->
- * Y -> a
- * LB -> 
- * RB -> 
+/* 
+ * A -> Unbinded
+ * B -> Unbinded
+ * X -> Unbinded
+ * Y -> Unbinded
+ * LB -> Unbinded
+ * RB -> Unbinded
  * LeftJoystick -> Motion of robot
  * RightJoystick -> Rotation of robot
- * DPad Up ->
- * DPad Down ->
- * DPad Left ->
- * DPad Right ->
- * LeftTrigger -> Brake/Slow down (go slower when held more)
- * RightTrigger -> 
- * 
+ * DPad Up -> Unbinded
+ * DPad Down -> Unbinded
+ * DPad Left -> Unbinded
+ * DPad Right -> Unbinded
+ * LeftTrigger -> Brake? Do we really need this?
+ * RightTrigger -> Unbinded
  */
 //Check if dpad right is pressed on the gunner controller
   public boolean launchRequested(){
@@ -217,5 +219,11 @@ launchTrigger.onTrue(new Launch());
 
     // Run path following command, then stop at the end.
     return swerveControllerCommand.andThen(() -> m_robotDrive.drive(0, 0, 0, false));
+  }
+public boolean extendClimberRequested(){
+    return m_gunnerController.getPOV() == 0;
+  } 
+  public boolean retractClimberRequested(){
+    return m_gunnerController.getPOV() == 180;
   }
 }
