@@ -62,6 +62,7 @@ public class RobotContainer {
   private final IntakeSubsystem m_robotIntake = new IntakeSubsystem();
   private final TurretSubsystem m_robotTurret = new TurretSubsystem();
   private final ClimberSubsystem m_robotClimber = new ClimberSubsystem();
+  private final LauncherSubsystem m_launcherSubsystem = new LauncherSubsystem();
 
   // The driver's controller
   XboxController m_driverController = new XboxController(OIConstants.kDriverControllerPort);
@@ -106,74 +107,82 @@ public class RobotContainer {
         .onTrue(new InstantCommand(
             () -> m_robotDrive.zeroHeading(),
             m_robotDrive));
-    //Gunner Controls
-    new JoystickButton(m_gunnerController, XboxController.Button.kA.value).onTrue(new RunCommand(() -> m_robotIntake.toggleIntake(), m_robotIntake));
+
+    //Driver controls
+    new JoystickButton(m_gunnerController, XboxController.Button.kA.value).onTrue(new RunCommand(() -> m_robotIntake.toggleIntakeExtentions(), m_robotIntake));
     new JoystickButton(m_gunnerController, XboxController.Button.kB.value).whileTrue(new RunCommand(() -> m_robotTurret.setAllianceZoneLock(), m_robotTurret));
     new JoystickButton(m_gunnerController, XboxController.Button.kX.value).onTrue(new RunCommand(() -> m_robotClimber.toggleHookLatch(), m_robotClimber));
     new JoystickButton(m_gunnerController, XboxController.Button.kY.value).whileTrue(new RunCommand(() -> m_robotTurret.lockOntoHub(), m_robotTurret));
     new JoystickButton(m_gunnerController, XboxController.Button.kLeftBumper.value).whileTrue(new RunCommand(() -> m_robotIntake.reverseIntakeRollers(), m_robotIntake));
     new JoystickButton(m_gunnerController, XboxController.Button.kRightStick.value).whileTrue(new RunCommand(() -> m_robotTurret.aimLauncher(), m_robotTurret));
-    new JoystickButton(m_gunnerController, XboxController.Button.kLeftTrigger.value).onTrue(new RunCommand(() -> m_robotIntake.startStopIntakeRollers(), m_robotIntake));
-    new JoystickButton(m_gunnerController, XboxController.Button.kRightTrigger.value).whileTrue(new RunCommand(() -> m_robotTurret.launchFuel(), m_robotTurret));
+    new JoystickButton(m_gunnerController, XboxController.Button.kDPadUp.value).whileTrue(new RunCommand(() -> m_robotClimber.extendClimber(), m_robotClimber));
+    new JoystickButton(m_gunnerController, XboxController.Button.kDPadDown.value).whileTrue(new RunCommand(() -> m_robotClimber.retractClimber(), m_robotClimber));
     new JoystickButton(m_gunnerController, XboxController.Button.kStart.value).onTrue(new RunCommand(() -> m_robotTurret.startStopLauncherMotors(), m_robotTurret));
-    //Driver Controls
+    //The right trigger is defined and controlls the launcher motors
+Trigger launchTrigger = new Trigger(this::launchRequested);
+launchTrigger.whileTrue(new InstantCommand(() -> m_launcherSubsystem.startLauncher(0.5), m_launcherSubsystem));
+launchTrigger.onFalse(new InstantCommand(() -> m_launcherSubsystem.stopLauncher(), m_launcherSubsystem));
+
+Trigger intakeTrigger = new Trigger(this::intakeRequested);
+intakeTrigger.onTrue(new InstantCommand(() -> m_robotIntake.startIntakeRollers(), m_robotIntake));
+intakeTrigger.onFalse(new InstantCommand(() -> m_robotIntake.stopIntakeRollers(), m_robotIntake));
+
+    //Driver controls
+    new JoystickButton(m_driverController, XboxController.Button.LeftJoystick.value).whileTrue(new RunCommand(() -> m_robotDrive.driveMotion(), m_robotDrive));
+    new JoystickButton(m_driverController, XboxController.Button.RightJoystick.value).whileTrue(new RunCommand(() -> m_robotDrive.driveRotation(), m_robotDrive));
     new JoystickButton(m_driverController, XboxController.Button.kLeftTrigger.value).whileTrue(new RunCommand(() -> m_robotDrive.brakeSlowDown(), m_robotDrive));
 
-    Trigger extendClimberTrigger = new Trigger(this::extendClimberRequested);
-    extendClimberTrigger.whileTrue(new RunCommand(() -> m_robotClimber.extendClimber(0.5), m_robotClimber));
-    extendClimberTrigger.onFalse(new RunCommand(() -> m_robotClimber.stopClimber(), m_robotClimber));
-
-    Trigger retractClimberTrigger = new Trigger(this::retractClimberRequested);
-    retractClimberTrigger.whileTrue(new RunCommand(() -> m_robotClimber.retractClimber(0.5), m_robotClimber));
-    retractClimberTrigger.onFalse(new RunCommand(() -> m_robotClimber.stopClimber(), m_robotClimber));
+    //Right trigger for Driver to slow/stop the robot
+    Trigger launchTrigger = new Trigger(this::launchRequested);
+   whileTrue(new RunCommand(() -> m_robotDrive.(0.5), m_launcherSubsystem));
+    onFalse(new InstantCommand(() -> m_launcherSubsystem.stopLauncher(), m_launcherSubsystem));
   }
 
-/*
+/* Gunner
  * A -> Extend/Retract Intake (toggle) DONE
  * B -> Track outpost with Limelight to shoot into alliance zone (hold) DONE
  * X -> Latch Hook on climber (toggle) DONE
  * Y -> Lock onto hub (hold)
  * LB -> Reverse Intake Rollers (hold)
- * RB -> Unbinded
+ * RB -> 
  * LeftJoystick -> 
  * LeftJoystickClick ->
  * RightJoystick -> Aim launcher
  * RightJoystickClick ->
  * DPad Up -> Climber extend (hold)
  * DPad Down -> Climber retract (hold)
- * DPad Left -> Unbinded
- * DPad Right -> Unbinded
- * LeftTrigger -> Start/stop Intake Rollers (toggle)
- * RightTrigger -> Launch fuel (hold)
- * StartButton -> Start/Stop launcher motors (toggle)
+ * DPad Left ->
+ * DPad Right ->
+ * LeftTrigger -> Start/stop Intake Rollers (toggle) DONE
+ * RightTrigger -> Launch fuel (hold) DONE
+ * StartButton -> Start/Stop launcher motors (toggle) DONE
+ * 
  */
-/* 
- * A -> Unbinded
- * B -> Unbinded
- * X -> Unbinded
- * Y -> Unbinded
- * LB -> Unbinded
- * RB -> Unbinded
+/* Driver
+ * A -> 
+ * B ->
+ * X ->
+ * Y -> a
+ * LB -> 
+ * RB -> 
  * LeftJoystick -> Motion of robot
  * RightJoystick -> Rotation of robot
- * DPad Up -> Unbinded
- * DPad Down -> Unbinded
- * DPad Left -> Unbinded
- * DPad Right -> Unbinded
- * LeftTrigger -> Brake? Do we really need this?
- * RightTrigger -> Unbinded
+ * DPad Up ->
+ * DPad Down ->
+ * DPad Left ->
+ * DPad Right ->
+ * LeftTrigger -> Brake/Slow down (go slower when held more)? Dont really need but maybe
+ * RightTrigger -> 
+ * 
  */
 //Check if dpad right is pressed on the gunner controller
   public boolean launchRequested(){
     return m_gunnerController.getRightTriggerAxis() > 0.9;
   }
 
-  // Define the Trigger
-// Bind the Trigger to the setMotorSpeed
-{
-Trigger launchTrigger = new Trigger(this::launchRequested);
-launchTrigger.onTrue(new Launch());
-}
+  public boolean intakeRequested(){
+    return m_gunnerController.getLeftTriggerAxis() > 0.9;
+  }
 
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
@@ -219,11 +228,5 @@ launchTrigger.onTrue(new Launch());
 
     // Run path following command, then stop at the end.
     return swerveControllerCommand.andThen(() -> m_robotDrive.drive(0, 0, 0, false));
-  }
-public boolean extendClimberRequested(){
-    return m_gunnerController.getPOV() == 0;
-  } 
-  public boolean retractClimberRequested(){
-    return m_gunnerController.getPOV() == 180;
   }
 }
