@@ -17,6 +17,7 @@ import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.PS4Controller.Button;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveConstants;
@@ -109,12 +110,24 @@ public class RobotContainer {
     new JoystickButton(m_gunnerController, XboxController.Button.kA.value).onTrue(new RunCommand(() -> m_robotIntake.toggleIntake(), m_robotIntake));
     new JoystickButton(m_gunnerController, XboxController.Button.kB.value).whileTrue(new RunCommand(() -> m_robotTurret.setAllianceZoneLock(), m_robotTurret));
     new JoystickButton(m_gunnerController, XboxController.Button.kX.value).onTrue(new RunCommand(() -> m_robotClimber.toggleHookLatch(), m_robotClimber));
+    new JoystickButton(m_gunnerController, XboxController.Button.kY.value).whileTrue(new RunCommand(() -> m_robotTurret.lockOntoHub(), m_robotTurret));
+    new JoystickButton(m_gunnerController, XboxController.Button.kLeftBumper.value).whileTrue(new RunCommand(() -> m_robotIntake.reverseIntakeRollers(), m_robotIntake));
+    new JoystickButton(m_gunnerController, XboxController.Button.kRightStick.value).whileTrue(new RunCommand(() -> m_robotTurret.aimLauncher(), m_robotTurret));
+    new JoystickButton(m_gunnerController, XboxController.Button.kDPadUp.value).whileTrue(new RunCommand(() -> m_robotClimber.extendClimber(), m_robotClimber));
+    new JoystickButton(m_gunnerController, XboxController.Button.kDPadDown.value).whileTrue(new RunCommand(() -> m_robotClimber.retractClimber(), m_robotClimber));
+    new JoystickButton(m_gunnerController, XboxController.Button.kLeftTrigger.value).onTrue(new RunCommand(() -> m_robotIntake.startStopIntakeRollers(), m_robotIntake));
+    new JoystickButton(m_gunnerController, XboxController.Button.kRightTrigger.value).whileTrue(new RunCommand(() -> m_robotTurret.launchFuel(), m_robotTurret));
+    new JoystickButton(m_gunnerController, XboxController.Button.kStart.value).onTrue(new RunCommand(() -> m_robotTurret.startStopLauncherMotors(), m_robotTurret));
+    new JoystickButton(m_driverController, XboxController.Button.LeftJoystick.value).whileTrue(new RunCommand(() -> m_robotDrive.driveMotion(), m_robotDrive));
+    new JoystickButton(m_driverController, XboxController.Button.RightJoystick.value).whileTrue(new RunCommand(() -> m_robotDrive.driveRotation(), m_robotDrive));
+    new JoystickButton(m_driverController, XboxController.Button.kLeftTrigger.value).whileTrue(new RunCommand(() -> m_robotDrive.brakeSlowDown(), m_robotDrive));
+
   }
 
 /* Gunner
- * A -> Extend/Retract Intake (toggle)
- * B -> Track outpost with Limelight to shoot into alliance zone (hold)
- * X -> Latch Hook on climber (toggle)
+ * A -> Extend/Retract Intake (toggle) DONE
+ * B -> Track outpost with Limelight to shoot into alliance zone (hold) DONE
+ * X -> Latch Hook on climber (toggle) DONE
  * Y -> Lock onto hub (hold)
  * LB -> Reverse Intake Rollers (hold)
  * RB -> 
