@@ -22,8 +22,11 @@ import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.OIConstants;
 import frc.robot.commands.LauncherCommands.Launch;
+import frc.robot.subsystems.ClimberSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
+import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.LauncherSubsystem;
+import frc.robot.subsystems.TurretSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
@@ -55,6 +58,9 @@ public class RobotContainer {
 
   //  MOVED TO INSIDE public RobotContainer(), because need to send pigeon as parameter.
   private final DriveSubsystem m_robotDrive = new DriveSubsystem(m_Pigeon);
+  private final IntakeSubsystem m_robotIntake = new IntakeSubsystem();
+  private final TurretSubsystem m_robotTurret = new TurretSubsystem();
+  private final ClimberSubsystem m_robotClimber = new ClimberSubsystem();
 
   // The driver's controller
   XboxController m_driverController = new XboxController(OIConstants.kDriverControllerPort);
@@ -99,8 +105,49 @@ public class RobotContainer {
         .onTrue(new InstantCommand(
             () -> m_robotDrive.zeroHeading(),
             m_robotDrive));
+
+    new JoystickButton(m_gunnerController, XboxController.Button.kA.value).onTrue(new RunCommand(() -> m_robotIntake.toggleIntake(), m_robotIntake));
+    new JoystickButton(m_gunnerController, XboxController.Button.kB.value).whileTrue(new RunCommand(() -> m_robotTurret.setAllianceZoneLock(), m_robotTurret));
+    new JoystickButton(m_gunnerController, XboxController.Button.kX.value).onTrue(new RunCommand(() -> m_robotClimber.toggleHookLatch(), m_robotClimber));
   }
 
+/* Gunner
+ * A -> Extend/Retract Intake (toggle)
+ * B -> Track outpost with Limelight to shoot into alliance zone (hold)
+ * X -> Latch Hook on climber (toggle)
+ * Y -> Lock onto hub (hold)
+ * LB -> Reverse Intake Rollers (hold)
+ * RB -> 
+ * LeftJoystick -> 
+ * LeftJoystickClick ->
+ * RightJoystick -> Aim launcher
+ * RightJoystickClick ->
+ * DPad Up -> Climber extend (hold)
+ * DPad Down -> Climber retract (hold)
+ * DPad Left ->
+ * DPad Right ->
+ * LeftTrigger -> Start/stop Intake Rollers (toggle)
+ * RightTrigger -> Launch fuel (hold)
+ * StartButton -> Start/Stop launcher motors (toggle)
+ * 
+ */
+/* Driver
+ * A -> 
+ * B ->
+ * X ->
+ * Y -> a
+ * LB -> 
+ * RB -> 
+ * LeftJoystick -> Motion of robot
+ * RightJoystick -> Rotation of robot
+ * DPad Up ->
+ * DPad Down ->
+ * DPad Left ->
+ * DPad Right ->
+ * LeftTrigger -> Brake/Slow down (go slower when held more)
+ * RightTrigger -> 
+ * 
+ */
 //Check if dpad right is pressed on the gunner controller
   public boolean launchRequested(){
     return m_gunnerController.getRightTriggerAxis() > 0.9;

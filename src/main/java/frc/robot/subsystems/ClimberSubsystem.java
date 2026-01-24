@@ -7,8 +7,22 @@ package frc.robot.subsystems;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class ClimberSubsystem extends SubsystemBase {
+
+private boolean m_hookLatched = false;
+
   /** Creates a new ClimberSubsystem. */
   public ClimberSubsystem() {}
+
+  public void toggleHookLatch() {
+    // Code to toggle the hook latch mechanism
+    if (m_hookLatched == true) {
+          System.out.println("[CLIMBER] Unlatch hook");
+          m_hookLatched = false;
+    } else {
+          System.out.println("[CLIMBER] Latch hook");
+          m_hookLatched = true;
+    }
+  }
 
   @Override
   public void periodic() {
