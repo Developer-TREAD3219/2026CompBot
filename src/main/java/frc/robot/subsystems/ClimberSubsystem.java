@@ -23,20 +23,7 @@ private boolean m_hookLatched = false;
           m_hookLatched = true;
     }
   }
-public void extendClimber(double speed) {
-    // Code to extend the climber mechanism
-    System.out.println("[CLIMBER] Extending climber");
-  }
-  
-  public void retractClimber(double speed) {
-    // Code to retract the climber mechanism
-    System.out.println("[CLIMBER] Retracting climber");
-  }
 
-  public void stopClimber() {
-    // Code to stop the climber mechanism // Set Speed to 0
-    System.out.println("[CLIMBER] Stopping climber");
-  }
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
