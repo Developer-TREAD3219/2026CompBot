@@ -122,10 +122,8 @@ public class RobotContainer {
         .whileTrue(new RunCommand(() -> m_robotIntake.reverseIntakeRollers(), m_robotIntake));
     // new JoystickButton(m_gunnerController, XboxController.Button.kRightStick.value)
     //     .whileTrue(new RunCommand(() -> m_robotTurret.aimLauncher(), m_robotTurret));
-    // new JoystickButton(m_gunnerController, XboxController.Button.kDPadUp.value)
-    //     .whileTrue(new RunCommand(() -> m_robotClimber.extendClimber(), m_robotClimber));
-    // new JoystickButton(m_gunnerController, XboxController.Button.kDPadDown.value)
-    //     .whileTrue(new RunCommand(() -> m_robotClimber.retractClimber(), m_robotClimber));
+    // CONNOR MADE A CHANGE
+    // CONNOR MADE ANOTHER CHANGE
     new JoystickButton(m_gunnerController, XboxController.Button.kStart.value)
         .onTrue(new RunCommand(() -> m_robotTurret.startStopLauncherMotors(), m_robotTurret));
     // The right trigger is defined and controlls the launcher motors
