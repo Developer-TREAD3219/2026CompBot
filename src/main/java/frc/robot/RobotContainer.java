@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.PS4Controller.Button;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveConstants;
+import frc.robot.Constants.LauncherMotorConstants;
 import frc.robot.Constants.OIConstants;
 import frc.robot.commands.LauncherCommands.Launch;
 import frc.robot.subsystems.ClimberSubsystem;
@@ -59,34 +60,57 @@ public class RobotContainer {
 
   // MOVED TO INSIDE public RobotContainer(), because need to send pigeon as
   // parameter.
-  private final DriveSubsystem m_robotDrive = new DriveSubsystem(m_Pigeon);
-  private final IntakeSubsystem m_robotIntake = new IntakeSubsystem();
-  private final TurretSubsystem m_robotTurret = new TurretSubsystem();
-  private final ClimberSubsystem m_robotClimber = new ClimberSubsystem();
-  private final LauncherSubsystem m_launcherSubsystem = new LauncherSubsystem();
+  private final DriveSubsystem m_robotDrive;
+  private final IntakeSubsystem m_robotIntake;
+  private final TurretSubsystem m_robotTurret;
+  private final ClimberSubsystem m_robotClimber;
 
   // The driver's controller
   XboxController m_driverController = new XboxController(OIConstants.kDriverControllerPort);
   XboxController m_gunnerController = new XboxController(OIConstants.kGunnerControllerPort);
 
+  private final LauncherSubsystem m_launcherSubsystem = new LauncherSubsystem(m_gunnerController, null);
+
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
   public RobotContainer() {
+
+    if (!Constants.kTestMode) {
+      m_robotDrive = new DriveSubsystem(m_Pigeon);
+      m_robotIntake = new IntakeSubsystem();
+      m_robotTurret = new TurretSubsystem();
+      m_robotClimber = new ClimberSubsystem();
+    } else {
+      m_robotDrive = null;
+      m_robotIntake = null;
+      m_robotTurret = null;
+      m_robotClimber = null;
+    }
+
     // Configure the button bindings
-    configureButtonBindings();
+    if (!Constants.kTestMode) {
+      configureButtonBindings();
+    } else {
+      Trigger launchTrigger = new Trigger(this::launchRequested);
+      launchTrigger.whileTrue(new InstantCommand(
+          () -> m_launcherSubsystem.startLauncher(LauncherMotorConstants.kLauncherMotorSpeed), m_launcherSubsystem));
+      launchTrigger.onFalse(new InstantCommand(() -> m_launcherSubsystem.stopLauncher(), m_launcherSubsystem));
+    }
 
     // Configure default commands
-    m_robotDrive.setDefaultCommand(
-        // The left stick controls translation of the robot.
-        // Turning is controlled by the X axis of the right stick.
-        new RunCommand(
-            () -> m_robotDrive.drive(
-                -MathUtil.applyDeadband(m_driverController.getLeftY(), OIConstants.kDriveDeadband),
-                -MathUtil.applyDeadband(m_driverController.getLeftX(), OIConstants.kDriveDeadband),
-                -MathUtil.applyDeadband(m_driverController.getRightX(), OIConstants.kDriveDeadband),
-                true),
-            m_robotDrive));
+    if (m_robotDrive != null) {
+      m_robotDrive.setDefaultCommand(
+          // The left stick controls translation of the robot.
+          // Turning is controlled by the X axis of the right stick.
+          new RunCommand(
+              () -> m_robotDrive.drive(
+                  -MathUtil.applyDeadband(m_driverController.getLeftY(), OIConstants.kDriveDeadband),
+                  -MathUtil.applyDeadband(m_driverController.getLeftX(), OIConstants.kDriveDeadband),
+                  -MathUtil.applyDeadband(m_driverController.getRightX(), OIConstants.kDriveDeadband),
+                  true),
+              m_robotDrive));
+    }
   }
 
   /**
@@ -120,12 +144,15 @@ public class RobotContainer {
         .whileTrue(new RunCommand(() -> m_robotTurret.lockOntoHub(), m_robotTurret));
     new JoystickButton(m_gunnerController, XboxController.Button.kLeftBumper.value)
         .whileTrue(new RunCommand(() -> m_robotIntake.reverseIntakeRollers(), m_robotIntake));
-    // new JoystickButton(m_gunnerController, XboxController.Button.kRightStick.value)
-    //     .whileTrue(new RunCommand(() -> m_robotTurret.aimLauncher(), m_robotTurret));
+    // new JoystickButton(m_gunnerController,
+    // XboxController.Button.kRightStick.value)
+    // .whileTrue(new RunCommand(() -> m_robotTurret.aimLauncher(), m_robotTurret));
     // new JoystickButton(m_gunnerController, XboxController.Button.kDPadUp.value)
-    //     .whileTrue(new RunCommand(() -> m_robotClimber.extendClimber(), m_robotClimber));
+    // .whileTrue(new RunCommand(() -> m_robotClimber.extendClimber(),
+    // m_robotClimber));
     // new JoystickButton(m_gunnerController, XboxController.Button.kDPadDown.value)
-    //     .whileTrue(new RunCommand(() -> m_robotClimber.retractClimber(), m_robotClimber));
+    // .whileTrue(new RunCommand(() -> m_robotClimber.retractClimber(),
+    // m_robotClimber));
     new JoystickButton(m_gunnerController, XboxController.Button.kStart.value)
         .onTrue(new RunCommand(() -> m_robotTurret.startStopLauncherMotors(), m_robotTurret));
     // The right trigger is defined and controlls the launcher motors
@@ -139,7 +166,8 @@ public class RobotContainer {
     retractClimberTrigger.onFalse(new RunCommand(() -> m_robotClimber.stopClimber(), m_robotClimber));
 
     Trigger launchTrigger = new Trigger(this::launchRequested);
-    launchTrigger.whileTrue(new InstantCommand(() -> m_launcherSubsystem.startLauncher(0.5), m_launcherSubsystem));
+    launchTrigger.whileTrue(new InstantCommand(
+        () -> m_launcherSubsystem.startLauncher(LauncherMotorConstants.kLauncherMotorSpeed), m_launcherSubsystem));
     launchTrigger.onFalse(new InstantCommand(() -> m_launcherSubsystem.stopLauncher(), m_launcherSubsystem));
 
     Trigger intakeTrigger = new Trigger(this::intakeRequested);
@@ -194,6 +222,8 @@ public class RobotContainer {
    */
   // Check if dpad right is pressed on the gunner controller
   public boolean launchRequested() {
+    System.out.println("Right Trigger Axis: " + m_gunnerController.getRightTriggerAxis());
+
     return m_gunnerController.getRightTriggerAxis() > 0.9;
   }
 
