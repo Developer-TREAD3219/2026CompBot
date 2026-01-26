@@ -110,12 +110,12 @@ public final class Constants {
   }
 
   public static final class SensorConstants {
-    public static final int kPigeonCanId = 15;
+    public static final int kPigeonCanId = 60;
   }
 
   public static final class LauncherMotorConstants {
-    public static final int kLauncherMotorMaster = 1;
-    public static final int kLauncherMotorFollower = 2;
+    public static final int kLauncherMotorMaster = 20;
+    public static final int kLauncherMotorFollower = 21;
 
     public static final double kLauncherMotorSpeed = 0.05;
   }
