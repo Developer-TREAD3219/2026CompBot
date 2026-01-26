@@ -46,7 +46,7 @@ public final class Constants {
     public static final double kBackLeftChassisAngularOffset = Math.PI;
     public static final double kBackRightChassisAngularOffset = Math.PI / 2;
 
-    // SPARK MAX CAN IDs
+    // SPARK MAX CAN IDs (using 10-17 for drive and turning motors)
     public static final int kFrontLeftDrivingCanId = 11;
     public static final int kRearLeftDrivingCanId = 13;
     public static final int kFrontRightDrivingCanId = 15;
@@ -106,15 +106,22 @@ public final class Constants {
     public static final String kCameraName = "April";
   }
 
+  // Note: CAN ID 10-17 used for drive and turning motors
+  // CAN ID 60 used for Pigeon IMU
   public static final class SensorConstants {
-    public static final int kPigeonCanId = 15;
+    public static final int kPigeonCanId = 60;
   }
 
-  public static final class LauncherMotorConstants {
-    public static final int kLauncherMotorMaster = 10;
-    public static final int kLauncherMotorFollower = 10;
+  // CAN ID 20-21 used for launcher motors
+  public static final class LauncherConstants {
+    public static final int kLauncherMotorMaster = 20;
+    public static final int kLauncherMotorFollower = 21;
 
     public static final double kLauncherMotorSpeed = 1.0;
+  }
+
+  public static final class ClimberConstants {
+    public static final int kClimberMotorCanId = 25;
   }
 
   public static final class LedConstants {
