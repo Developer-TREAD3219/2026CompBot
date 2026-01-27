@@ -109,7 +109,10 @@ public final class Constants {
     public static final String kCameraName = "April";
   }
 
-  // Note: CAN ID 10-17 used for drive and turning motors
+  /* Note: CAN ID 0 used for RoboRio
+         CAN ID 10-17 used for drive and turning motors
+         CAN ID 19 PDH
+  */
   // CAN ID 60 used for Pigeon IMU
   public static final class SensorConstants {
     public static final int kPigeonCanId = 60;

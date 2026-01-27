@@ -178,14 +178,22 @@ public class RobotContainer {
     // XboxController.Button.kRightStick.value)
     // .whileTrue(new RunCommand(() -> m_robotTurret.aimLauncher(), m_robotTurret));
 
-    // DPad Up extends climber while held
+    // DPad Up extends climber for 5 seconds when pressed
     Trigger extendClimberTrigger = new Trigger(this::extendClimberRequested);
-    extendClimberTrigger.whileTrue(new RunCommand(() -> m_robotClimber.extendClimber(0.5), m_robotClimber));
-    extendClimberTrigger.onFalse(new RunCommand(() -> m_robotClimber.stopClimber(), m_robotClimber));
-    // DPad Down retracts climber while held
+    extendClimberTrigger.onTrue(
+        new RunCommand(() -> m_robotClimber.extendClimber(0.5), m_robotClimber)
+        .withTimeout(5)
+        .andThen(() -> m_robotClimber.stopClimber()) 
+    );
+
+    // DPad Down retracts climber for 5 seconds when pressed
     Trigger retractClimberTrigger = new Trigger(this::retractClimberRequested);
-    retractClimberTrigger.whileTrue(new RunCommand(() -> m_robotClimber.retractClimber(0.5), m_robotClimber));
-    retractClimberTrigger.onFalse(new RunCommand(() -> m_robotClimber.stopClimber(), m_robotClimber));
+    retractClimberTrigger.onTrue(
+        new RunCommand(() -> m_robotClimber.retractClimber(0.5), m_robotClimber)
+        .withTimeout(5)
+        .andThen(() -> m_robotClimber.stopClimber()) 
+    );
+
     // The right trigger while held runs the launcher motors
     Trigger launchTrigger = new Trigger(this::launchRequested);
     launchTrigger.whileTrue(new InstantCommand(
