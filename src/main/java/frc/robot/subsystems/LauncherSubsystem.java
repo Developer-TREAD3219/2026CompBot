@@ -13,6 +13,8 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import frc.robot.Constants.LauncherConstants;
+import frc.robot.Constants.States;
+
 
 
 public class LauncherSubsystem extends SubsystemBase {
@@ -22,9 +24,9 @@ public class LauncherSubsystem extends SubsystemBase {
   private final TalonFX m_krakenMotorMaster = new TalonFX(LauncherConstants.kLauncherMotorMaster); // Replace 10 with your motor's CAN ID
   private final TalonFX m_krakenMotorFollower = new  TalonFX (LauncherConstants.kLauncherMotorFollower);
 
-  public LauncherSubsystem(XboxController controller, States botstate) {
+  public LauncherSubsystem(XboxController controller, States.State botState) {
 
-    States m_botState = botstate;
+    States.State m_botState = botState;
     XboxController m_controller = controller;
     m_krakenMotorFollower.setControl(new Follower(m_krakenMotorMaster.getDeviceID(), MotorAlignmentValue.Opposed));
 
