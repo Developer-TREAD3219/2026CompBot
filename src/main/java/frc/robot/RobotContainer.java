@@ -104,11 +104,17 @@ public class RobotContainer {
           () -> m_launcherSubsystem.startLauncher(LauncherConstants.kLauncherMotorSpeed), m_launcherSubsystem));
       launchTrigger.onFalse(new InstantCommand(() -> m_launcherSubsystem.stopLauncher(), m_launcherSubsystem));
       Trigger extendClimberTrigger = new Trigger(this::extendClimberRequested);
-      extendClimberTrigger.whileTrue(new RunCommand(() -> m_robotClimber.extendClimber(0.5), m_robotClimber));
-      extendClimberTrigger.onFalse(new RunCommand(() -> m_robotClimber.stopClimber(), m_robotClimber));
+      extendClimberTrigger.onTrue(
+          new RunCommand(() -> m_robotClimber.extendClimber(0.5), m_robotClimber)
+              .withTimeout(5)
+              .andThen(() -> m_robotClimber.stopClimber()));
+      // DPad Down retracts climber for 5 seconds when pressed
       Trigger retractClimberTrigger = new Trigger(this::retractClimberRequested);
-      retractClimberTrigger.whileTrue(new RunCommand(() -> m_robotClimber.retractClimber(0.5), m_robotClimber));
-      retractClimberTrigger.onFalse(new RunCommand(() -> m_robotClimber.stopClimber(), m_robotClimber));
+      retractClimberTrigger.onTrue(
+          new RunCommand(() -> m_robotClimber.retractClimber(0.5), m_robotClimber)
+              .withTimeout(5)
+              .andThen(() -> m_robotClimber.stopClimber()));
+
       // The left trigger while held runs the intake rollers
       Trigger intakeTrigger = new Trigger(this::intakeRequested);
       intakeTrigger.onTrue(new InstantCommand(() -> m_robotIntake.startIntakeRollers(), m_robotIntake));
@@ -182,17 +188,15 @@ public class RobotContainer {
     Trigger extendClimberTrigger = new Trigger(this::extendClimberRequested);
     extendClimberTrigger.onTrue(
         new RunCommand(() -> m_robotClimber.extendClimber(0.5), m_robotClimber)
-        .withTimeout(5)
-        .andThen(() -> m_robotClimber.stopClimber()) 
-    );
+            .withTimeout(5)
+            .andThen(() -> m_robotClimber.stopClimber()));
 
     // DPad Down retracts climber for 5 seconds when pressed
     Trigger retractClimberTrigger = new Trigger(this::retractClimberRequested);
     retractClimberTrigger.onTrue(
         new RunCommand(() -> m_robotClimber.retractClimber(0.5), m_robotClimber)
-        .withTimeout(5)
-        .andThen(() -> m_robotClimber.stopClimber()) 
-    );
+            .withTimeout(5)
+            .andThen(() -> m_robotClimber.stopClimber()));
 
     // The right trigger while held runs the launcher motors
     Trigger launchTrigger = new Trigger(this::launchRequested);
