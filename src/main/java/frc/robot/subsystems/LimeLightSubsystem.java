@@ -19,8 +19,8 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import frc.robot.utils.AllianceHelpers;
 
 public class LimeLightSubsystem extends SubsystemBase {
-    private final SwerveDrivePoseEstimator m_poseEstimator;
-    private final Pigeon2 m_gyro; // Add this line to declare m_gyro
+    private SwerveDrivePoseEstimator m_poseEstimator;
+    private Pigeon2 m_gyro; // Add this line to declare m_gyro
     // Limelight for reading AprilTags
     private final String limelightCam = VisionConstants.kCameraName;
     private LimelightHelpers.LimelightResults result;
@@ -69,6 +69,15 @@ public class LimeLightSubsystem extends SubsystemBase {
         } else {
             activeHubTags = null;
             activetrenchTags = null;
+    private final double maxLockOnDistance = 0.5;
+
+    public LimeLightSubsystem(DriveSubsystem driveSubsystem) {
+        // Initialize Limelight settings if needed
+        this.m_poseEstimator = null;
+        this.m_gyro = null;
+        if (driveSubsystem != null) {
+            this.m_poseEstimator = driveSubsystem.getPoseEstimator();
+            this.m_gyro = driveSubsystem.getGyro(); // Initialize with appropriate parameters
         }
     }
 
@@ -85,11 +94,11 @@ public class LimeLightSubsystem extends SubsystemBase {
     public void update() {
         double currentTime = Timer.getFPGATimestamp();
         result = LimelightHelpers.getLatestResults(limelightCam);
-
-        // System.out.println(" result = " + result.targets_Fiducials.length);
-        // System.out.println(" Yaw=" + getYaw());
-        // System.out.println(" Skew=" + getSkew());
-        // System.out.println(" Pitch=" + getPitch());
+        if (result.targets_Fiducials.length == 0) return;
+        System.out.println(" result = " + result.targets_Fiducials.length);
+        System.out.println(" Yaw=" + getYaw());
+        System.out.println(" Skew=" + getSkew());
+        System.out.println(" Pitch=" + getPitch());
 
         // Clear our lock on if it's been too long
         if (currentLock != null && (currentTime - lastUpdateTime > bufferTime)) {

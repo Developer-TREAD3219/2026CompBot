@@ -22,12 +22,14 @@ import edu.wpi.first.wpilibj.PS4Controller.Button;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.LauncherConstants;
+import frc.robot.Constants.States;
 import frc.robot.Constants.OIConstants;
 import frc.robot.commands.LauncherCommands.Launch;
 import frc.robot.subsystems.ClimberSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.LauncherSubsystem;
+import frc.robot.subsystems.LimeLightSubsystem;
 import frc.robot.subsystems.TurretSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -36,6 +38,7 @@ import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
+import java.lang.Thread.State;
 import java.util.List;
 
 // other imports
@@ -55,6 +58,7 @@ public class RobotContainer {
 
   public CANBus m_CanBus = new CANBus();
   public Pigeon2 m_Pigeon = new Pigeon2(Constants.SensorConstants.kPigeonCanId, m_CanBus);
+  private States.State m_botState = States.State.Initial;
 
   // The robot's subsystems and commands are defined here...
 
@@ -63,39 +67,62 @@ public class RobotContainer {
   private final DriveSubsystem m_robotDrive;
   private final IntakeSubsystem m_robotIntake;
   private final TurretSubsystem m_robotTurret;
-  private final ClimberSubsystem m_robotClimber;
+  private final ClimberSubsystem m_robotClimber;  
+  private final LimeLightSubsystem m_Limelight;
 
   // The driver's controller
   XboxController m_driverController = new XboxController(OIConstants.kDriverControllerPort);
   XboxController m_gunnerController = new XboxController(OIConstants.kGunnerControllerPort);
 
-  private final LauncherSubsystem m_launcherSubsystem = new LauncherSubsystem(m_gunnerController, null);
+  private final LauncherSubsystem m_launcherSubsystem;
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
   public RobotContainer() {
-
+    // Initialize subsystems
+    m_botState = States.State.Initial;
     if (!Constants.kTestMode) {
       m_robotDrive = new DriveSubsystem(m_Pigeon);
       m_robotIntake = new IntakeSubsystem();
       m_robotTurret = new TurretSubsystem();
       m_robotClimber = new ClimberSubsystem();
     } else {
+      m_robotClimber = new ClimberSubsystem();
+      m_launcherSubsystem = new LauncherSubsystem(m_gunnerController, m_botState);
       m_robotDrive = null;
-      m_robotIntake = null;
-      m_robotTurret = null;
-      m_robotClimber = null;
+      m_robotIntake = new IntakeSubsystem();
+      m_robotTurret = new TurretSubsystem();
+      m_Limelight = new LimeLightSubsystem(m_robotDrive);
     }
 
+    
     // Configure the button bindings
     if (!Constants.kTestMode) {
       configureButtonBindings();
     } else {
+      new JoystickButton(m_gunnerController, XboxController.Button.kY.value)
+          .whileTrue(new RunCommand(() -> m_robotTurret.lockOntoHub(), m_robotTurret));
       Trigger launchTrigger = new Trigger(this::launchRequested);
       launchTrigger.whileTrue(new InstantCommand(
           () -> m_launcherSubsystem.startLauncher(LauncherConstants.kLauncherMotorSpeed), m_launcherSubsystem));
       launchTrigger.onFalse(new InstantCommand(() -> m_launcherSubsystem.stopLauncher(), m_launcherSubsystem));
+      Trigger extendClimberTrigger = new Trigger(this::extendClimberRequested);
+      extendClimberTrigger.onTrue(
+          new RunCommand(() -> m_robotClimber.extendClimber(0.5), m_robotClimber)
+              .withTimeout(5)
+              .andThen(() -> m_robotClimber.stopClimber()));
+      // DPad Down retracts climber for 5 seconds when pressed
+      Trigger retractClimberTrigger = new Trigger(this::retractClimberRequested);
+      retractClimberTrigger.onTrue(
+          new RunCommand(() -> m_robotClimber.retractClimber(0.5), m_robotClimber)
+              .withTimeout(5)
+              .andThen(() -> m_robotClimber.stopClimber()));
+
+      // The left trigger while held runs the intake rollers
+      Trigger intakeTrigger = new Trigger(this::intakeRequested);
+      intakeTrigger.onTrue(new InstantCommand(() -> m_robotIntake.startIntakeRollers(), m_robotIntake));
+      intakeTrigger.onFalse(new InstantCommand(() -> m_robotIntake.stopIntakeRollers(), m_robotIntake));
     }
 
     // Configure default commands
@@ -124,8 +151,8 @@ public class RobotContainer {
    */
   private void configureButtonBindings() {
     /*
-    DRIVER CONTROLS
-    */ 
+     * DRIVER CONTROLS
+     */
     new JoystickButton(m_driverController, Button.kR1.value)
         .whileTrue(new RunCommand(
             () -> m_robotDrive.setX(),
@@ -137,8 +164,8 @@ public class RobotContainer {
             m_robotDrive));
 
     /*
-    GUNNER CONTROLS
-    */ 
+     * GUNNER CONTROLS
+     */
     // A button toggles intake extensions (drops or retracts)
     new JoystickButton(m_gunnerController, XboxController.Button.kA.value)
         .onTrue(new RunCommand(() -> m_robotIntake.toggleIntakeExtentions(), m_robotIntake));
@@ -157,24 +184,23 @@ public class RobotContainer {
     // Start button starts/stops launcher motors
     new JoystickButton(m_gunnerController, XboxController.Button.kStart.value)
         .onTrue(new RunCommand(() -> m_robotTurret.startStopLauncherMotors(), m_robotTurret));
-    // new JoystickButton(m_gunnerController, XboxController.Button.kRightStick.value)
-    //     .whileTrue(new RunCommand(() -> m_robotTurret.aimLauncher(), m_robotTurret));
+    // new JoystickButton(m_gunnerController,
+    // XboxController.Button.kRightStick.value)
+    // .whileTrue(new RunCommand(() -> m_robotTurret.aimLauncher(), m_robotTurret));
 
     // DPad Up extends climber for 5 seconds when pressed
     Trigger extendClimberTrigger = new Trigger(this::extendClimberRequested);
     extendClimberTrigger.onTrue(
         new RunCommand(() -> m_robotClimber.extendClimber(0.5), m_robotClimber)
-        .withTimeout(5)
-        .andThen(() -> m_robotClimber.stopClimber()) 
-    );
+            .withTimeout(5)
+            .andThen(() -> m_robotClimber.stopClimber()));
 
     // DPad Down retracts climber for 5 seconds when pressed
     Trigger retractClimberTrigger = new Trigger(this::retractClimberRequested);
     retractClimberTrigger.onTrue(
         new RunCommand(() -> m_robotClimber.retractClimber(0.5), m_robotClimber)
-        .withTimeout(5)
-        .andThen(() -> m_robotClimber.stopClimber()) 
-    );
+            .withTimeout(5)
+            .andThen(() -> m_robotClimber.stopClimber()));
 
     // The right trigger while held runs the launcher motors
     Trigger launchTrigger = new Trigger(this::launchRequested);
@@ -236,19 +262,20 @@ public class RobotContainer {
   // Check if right trigger is pressed on the gunner controller
   // Called by launch Trigger in configureButtonBindings()
   public boolean launchRequested() {
-    System.out.println("Right Trigger Axis: " + m_gunnerController.getRightTriggerAxis());
-
     return m_gunnerController.getRightTriggerAxis() > 0.9;
   }
+
   // Check if left trigger is pressed on the gunner controller
   // Called by intake Trigger in configureButtonBindings()
   public boolean intakeRequested() {
     return m_gunnerController.getLeftTriggerAxis() > 0.9;
   }
+
   // Check if DPad Up is pressed on the gunner controller
   public boolean extendClimberRequested() {
     return m_gunnerController.getPOV() == 0;
   }
+
   // Check if DPad Down is pressed on the gunner controller
   public boolean retractClimberRequested() {
     return m_gunnerController.getPOV() == 180;
