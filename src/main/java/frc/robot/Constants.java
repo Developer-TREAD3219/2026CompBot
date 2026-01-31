@@ -5,6 +5,8 @@
 // hello world 
 package frc.robot;
 
+import java.net.PortUnreachableException;
+
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
@@ -109,10 +111,11 @@ public final class Constants {
     public static final String kCameraName = "limelight-tread";
   }
 
-  /* Note: CAN ID 0 used for RoboRio
-         CAN ID 10-17 used for drive and turning motors
-         CAN ID 19 PDH
-  */
+  /*
+   * Note: CAN ID 0 used for RoboRio
+   * CAN ID 10-17 used for drive and turning motors
+   * CAN ID 19 PDH
+   */
   // CAN ID 60 used for Pigeon IMU
   public static final class SensorConstants {
     public static final int kPigeonCanId = 60;
@@ -128,6 +131,11 @@ public final class Constants {
 
   public static final class ClimberConstants {
     public static final int kClimberMotorCanId = 25;
+  }
+
+  public static final class IndexerConstants {
+    public static final int kIndexerCanId = 26;
+    public static final double kIndexerMotorSpeed = 0.5;
   }
 
   public static final class LedConstants {
@@ -161,10 +169,10 @@ public final class Constants {
     }
 
     public State incrementState() {
-        State[] values = State.values();
-        State nextState = values[(m_currentState.ordinal() + 1) % values.length];
-        m_currentState = nextState;
-        return m_currentState;
+      State[] values = State.values();
+      State nextState = values[(m_currentState.ordinal() + 1) % values.length];
+      m_currentState = nextState;
+      return m_currentState;
     }
   }
 }

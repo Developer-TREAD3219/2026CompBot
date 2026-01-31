@@ -27,6 +27,7 @@ import frc.robot.Constants.OIConstants;
 import frc.robot.commands.LauncherCommands.Launch;
 import frc.robot.subsystems.ClimberSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
+import frc.robot.subsystems.IndexerSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.LauncherSubsystem;
 import frc.robot.subsystems.LimeLightSubsystem;
@@ -67,14 +68,14 @@ public class RobotContainer {
   private final DriveSubsystem m_robotDrive;
   private final IntakeSubsystem m_robotIntake;
   private final TurretSubsystem m_robotTurret;
-  private final ClimberSubsystem m_robotClimber;  
+  private final ClimberSubsystem m_robotClimber;
   private final LimeLightSubsystem m_Limelight;
+  private final IndexerSubsystem m_robotIndexer;
+  private final LauncherSubsystem m_launcherSubsystem;
 
   // The driver's controller
   XboxController m_driverController = new XboxController(OIConstants.kDriverControllerPort);
   XboxController m_gunnerController = new XboxController(OIConstants.kGunnerControllerPort);
-
-  private final LauncherSubsystem m_launcherSubsystem;
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -92,11 +93,11 @@ public class RobotContainer {
       m_launcherSubsystem = new LauncherSubsystem(m_gunnerController, m_botState);
       m_robotDrive = null;
       m_robotIntake = new IntakeSubsystem();
+      m_robotIndexer = new IndexerSubsystem();
       m_robotTurret = new TurretSubsystem();
       m_Limelight = new LimeLightSubsystem(m_robotDrive);
     }
 
-    
     // Configure the button bindings
     if (!Constants.kTestMode) {
       configureButtonBindings();
@@ -118,6 +119,12 @@ public class RobotContainer {
           new RunCommand(() -> m_robotClimber.retractClimber(0.5), m_robotClimber)
               .withTimeout(5)
               .andThen(() -> m_robotClimber.stopClimber()));
+
+      // Toggle on release
+      new JoystickButton(m_gunnerController, XboxController.Button.kRightBumper.value)
+          .onTrue(new RunCommand(() -> m_robotIndexer.buttonPress(), m_robotIndexer));
+      new JoystickButton(m_gunnerController, XboxController.Button.kRightBumper.value)
+          .onFalse(new RunCommand(() -> m_robotIndexer.buttonRelease(), m_robotIndexer));
 
       // The left trigger while held runs the intake rollers
       Trigger intakeTrigger = new Trigger(this::intakeRequested);
@@ -184,6 +191,8 @@ public class RobotContainer {
     // Start button starts/stops launcher motors
     new JoystickButton(m_gunnerController, XboxController.Button.kStart.value)
         .onTrue(new RunCommand(() -> m_robotTurret.startStopLauncherMotors(), m_robotTurret));
+    // Right Bumper toggles indexer start/stop
+
     // new JoystickButton(m_gunnerController,
     // XboxController.Button.kRightStick.value)
     // .whileTrue(new RunCommand(() -> m_robotTurret.aimLauncher(), m_robotTurret));
@@ -225,13 +234,13 @@ public class RobotContainer {
    * X -> Latch Hook on climber (toggle) DONE
    * Y -> Lock onto hub (hold)
    * LB -> Reverse Intake Rollers (hold)
-   * RB ->
+   * RB -> Indexer start/stop (toggle)
    * LeftJoystick ->
    * LeftJoystickClick ->
    * RightJoystick -> Aim launcher
    * RightJoystickClick ->
-   * DPad Up -> Climber extend (hold)
-   * DPad Down -> Climber retract (hold)
+   * DPad Up -> Climber extend (hold) DONE
+   * DPad Down -> Climber retract (hold) DONE
    * DPad Left ->
    * DPad Right ->
    * LeftTrigger -> Start/stop Intake Rollers (toggle) DONE
