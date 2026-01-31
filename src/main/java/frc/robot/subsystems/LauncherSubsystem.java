@@ -13,6 +13,7 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import frc.robot.Constants.LauncherConstants;
+import frc.robot.Constants.States;
 
 
 public class LauncherSubsystem extends SubsystemBase {

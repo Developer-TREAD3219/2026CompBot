@@ -21,7 +21,7 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.PS4Controller.Button;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveConstants;
-import frc.robot.Constants.LauncherMotorConstants;
+import frc.robot.Constants.LauncherConstants;
 import frc.robot.Constants.OIConstants;
 import frc.robot.commands.LauncherCommands.Launch;
 import frc.robot.subsystems.ClimberSubsystem;
@@ -94,7 +94,7 @@ public class RobotContainer {
     } else {
       Trigger launchTrigger = new Trigger(this::launchRequested);
       launchTrigger.whileTrue(new InstantCommand(
-          () -> m_launcherSubsystem.startLauncher(LauncherMotorConstants.kLauncherMotorSpeed), m_launcherSubsystem));
+          () -> m_launcherSubsystem.startLauncher(LauncherConstants.kLauncherMotorSpeed), m_launcherSubsystem));
       launchTrigger.onFalse(new InstantCommand(() -> m_launcherSubsystem.stopLauncher(), m_launcherSubsystem));
     }
 
@@ -179,7 +179,7 @@ public class RobotContainer {
     // The right trigger while held runs the launcher motors
     Trigger launchTrigger = new Trigger(this::launchRequested);
     launchTrigger.whileTrue(new InstantCommand(
-        () -> m_launcherSubsystem.startLauncher(LauncherMotorConstants.kLauncherMotorSpeed), m_launcherSubsystem));
+        () -> m_launcherSubsystem.startLauncher(LauncherConstants.kLauncherMotorSpeed), m_launcherSubsystem));
     launchTrigger.onFalse(new InstantCommand(() -> m_launcherSubsystem.stopLauncher(), m_launcherSubsystem));
     // The left trigger while held runs the intake rollers
     Trigger intakeTrigger = new Trigger(this::intakeRequested);
