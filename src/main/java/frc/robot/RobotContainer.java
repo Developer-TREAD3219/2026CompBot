@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.PS4Controller.Button;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveConstants;
+import frc.robot.Constants.IndexerConstants;
 import frc.robot.Constants.LauncherConstants;
 import frc.robot.Constants.States;
 import frc.robot.Constants.OIConstants;
@@ -33,9 +34,11 @@ import frc.robot.subsystems.LauncherSubsystem;
 import frc.robot.subsystems.LimeLightSubsystem;
 import frc.robot.subsystems.TurretSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -104,10 +107,17 @@ public class RobotContainer {
     } else {
       new JoystickButton(m_gunnerController, XboxController.Button.kY.value)
           .whileTrue(new RunCommand(() -> m_robotTurret.lockOntoHub(), m_robotTurret));
+
       Trigger launchTrigger = new Trigger(this::launchRequested);
       launchTrigger.whileTrue(new InstantCommand(
-          () -> m_launcherSubsystem.startLauncher(LauncherConstants.kLauncherMotorSpeed), m_launcherSubsystem));
-      launchTrigger.onFalse(new InstantCommand(() -> m_launcherSubsystem.stopLauncher(), m_launcherSubsystem));
+          () -> m_launcherSubsystem.startLauncher(LauncherConstants.kLauncherMotorSpeed), m_launcherSubsystem)
+          .andThen(new WaitCommand(IndexerConstants.kIndexerDelay))
+          .andThen(new InstantCommand(
+              () -> m_robotIndexer.startIndexerMotor(), m_robotIndexer)));
+
+      launchTrigger.onFalse(new InstantCommand(() -> m_launcherSubsystem.stopLauncher(), m_launcherSubsystem).andThen(
+          () -> m_robotIndexer.stopIndexerMotor(), m_robotIndexer));
+
       Trigger extendClimberTrigger = new Trigger(this::extendClimberRequested);
       extendClimberTrigger.onTrue(
           new RunCommand(() -> m_robotClimber.extendClimber(0.5), m_robotClimber)

@@ -136,6 +136,7 @@ public final class Constants {
   public static final class IndexerConstants {
     public static final int kIndexerCanId = 26;
     public static final double kIndexerMotorSpeed = 0.5;
+    public static final double kIndexerDelay = 2.0;
   }
 
   public static final class LedConstants {

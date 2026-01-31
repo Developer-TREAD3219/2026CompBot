@@ -38,6 +38,18 @@ public class IndexerSubsystem extends SubsystemBase {
       }
   }
 
+  public void startIndexerMotor() {
+    m_buttonState = false;
+    m_indexerOn = true;
+    m_indexerMotor.set(IndexerConstants.kIndexerMotorSpeed);
+  }
+
+  public void stopIndexerMotor() {
+    m_buttonState = false;
+    m_indexerOn = false;
+    m_indexerMotor.set(0);
+  }
+
   @Override
   public void periodic() {
 
