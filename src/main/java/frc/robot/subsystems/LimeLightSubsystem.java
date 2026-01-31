@@ -55,8 +55,12 @@ public class LimeLightSubsystem extends SubsystemBase {
 
     public LimeLightSubsystem(DriveSubsystem driveSubsystem) {
         // Initialize Limelight settings if needed
-        this.m_poseEstimator = driveSubsystem.getPoseEstimator();
-        this.m_gyro = driveSubsystem.getGyro(); // Initialize with appropriate parameters
+        this.m_poseEstimator = null;
+        this.m_gyro = null;
+        if (driveSubsystem != null) {
+            this.m_poseEstimator = driveSubsystem.getPoseEstimator();
+            this.m_gyro = driveSubsystem.getGyro(); // Initialize with appropriate parameters
+        }
 
         // Determine alliance color and set HubTags and TrenchTags accordingly
         activeAllianceColorHex = AllianceHelpers.getAllianceColor();
@@ -69,15 +73,6 @@ public class LimeLightSubsystem extends SubsystemBase {
         } else {
             activeHubTags = null;
             activetrenchTags = null;
-    private final double maxLockOnDistance = 0.5;
-
-    public LimeLightSubsystem(DriveSubsystem driveSubsystem) {
-        // Initialize Limelight settings if needed
-        this.m_poseEstimator = null;
-        this.m_gyro = null;
-        if (driveSubsystem != null) {
-            this.m_poseEstimator = driveSubsystem.getPoseEstimator();
-            this.m_gyro = driveSubsystem.getGyro(); // Initialize with appropriate parameters
         }
     }
 
@@ -94,7 +89,8 @@ public class LimeLightSubsystem extends SubsystemBase {
     public void update() {
         double currentTime = Timer.getFPGATimestamp();
         result = LimelightHelpers.getLatestResults(limelightCam);
-        if (result.targets_Fiducials.length == 0) return;
+        if (result.targets_Fiducials.length == 0)
+            return;
         System.out.println(" result = " + result.targets_Fiducials.length);
         System.out.println(" Yaw=" + getYaw());
         System.out.println(" Skew=" + getSkew());
@@ -129,7 +125,7 @@ public class LimeLightSubsystem extends SubsystemBase {
 
         // if(Math.abs(m_gyro.getRate()) > 720) // if our angular velocity is greater
         // than 720 degrees per second, ignore vision updates
-        if (Math.abs(m_gyro.getAngularVelocityZWorld().getValueAsDouble()) > 720) // if our angular velocity is greater
+        if (m_gyro != null && Math.abs(m_gyro.getAngularVelocityZWorld().getValueAsDouble()) > 720) // if our angular velocity is greater
                                                                                   // than 720 degrees per second, ignore
                                                                                   // vision updates
         {
