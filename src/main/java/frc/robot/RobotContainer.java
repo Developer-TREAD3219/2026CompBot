@@ -29,6 +29,7 @@ import frc.robot.subsystems.ClimberSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.LauncherSubsystem;
+import frc.robot.subsystems.LimeLightSubsystem;
 import frc.robot.subsystems.TurretSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -66,7 +67,8 @@ public class RobotContainer {
   private final DriveSubsystem m_robotDrive;
   private final IntakeSubsystem m_robotIntake;
   private final TurretSubsystem m_robotTurret;
-  private final ClimberSubsystem m_robotClimber;
+  private final ClimberSubsystem m_robotClimber;  
+  private final LimeLightSubsystem m_Limelight;
 
   // The driver's controller
   XboxController m_driverController = new XboxController(OIConstants.kDriverControllerPort);
@@ -91,8 +93,10 @@ public class RobotContainer {
       m_robotDrive = null;
       m_robotIntake = new IntakeSubsystem();
       m_robotTurret = new TurretSubsystem();
+      m_Limelight = new LimeLightSubsystem(m_robotDrive);
     }
 
+    
     // Configure the button bindings
     if (!Constants.kTestMode) {
       configureButtonBindings();

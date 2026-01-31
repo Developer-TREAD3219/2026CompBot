@@ -106,7 +106,7 @@ public final class Constants {
   }
 
   public static final class VisionConstants {
-    public static final String kCameraName = "April";
+    public static final String kCameraName = "limelight-tread";
   }
 
   /* Note: CAN ID 0 used for RoboRio
