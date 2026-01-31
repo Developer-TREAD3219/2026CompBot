@@ -16,6 +16,7 @@ import frc.robot.Constants.VisionConstants;
 
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import frc.robot.utils.AllianceHelpers;
 
 public class LimeLightSubsystem extends SubsystemBase {
     private SwerveDrivePoseEstimator m_poseEstimator;
@@ -26,8 +27,21 @@ public class LimeLightSubsystem extends SubsystemBase {
     private LimelightHelpers.LimelightTarget_Fiducial currentLock;
     private double currentLockDistance = Double.MAX_VALUE;
 
-    // List of Reef Tags
-    private final int[] rebuiltTags = { 6, 7, 8, 9, 10, 11, 17, 18, 19, 20, 21, 22 };
+    // Unsure if we want to use the line on top or leave it like this
+
+    // List of Hub Tags with their respective sides
+    private final int[] RedHubTags = { 2, 3, 4, 5, 8, 9, 10, 11, };
+    private final int[] BlueHubTags = { 18, 19, 20, 21, 24, 25, 26, 27 };
+    private final int[] RedTowerTags = { 15, 16 };
+    private final int[] BlueTowerTags = { 31, 32 };
+    private final int[] RedOutpostTags = { 13, 14 };
+    private final int[] BlueOutpostTags = { 29, 30 };
+    private final int[] RedTrenchTags = { 1, 6, 7, 12 };
+    private final int[] BlueTrenchTags = { 17, 22, 23, 28 };
+
+    private int[] activeHubTags;
+    private int[] activetrenchTags;
+    private String activeAllianceColorHex;
 
     // Target lock buffer duration: how long we're ok with keeping an old result
     private final double bufferTime = 1.0;
@@ -35,6 +49,26 @@ public class LimeLightSubsystem extends SubsystemBase {
 
     // Target lock on maxDistance: the farthest away in meters that we want to lock
     // on from
+    private final double maxLockOnDistance = 4.0;
+    // private final double maxLockOnDistance = 0.5;
+    // 0.5 meters = 1.64042 feet
+
+    public LimeLightSubsystem(DriveSubsystem driveSubsystem) {
+        // Initialize Limelight settings if needed
+        this.m_poseEstimator = driveSubsystem.getPoseEstimator();
+        this.m_gyro = driveSubsystem.getGyro(); // Initialize with appropriate parameters
+
+        // Determine alliance color and set HubTags and TrenchTags accordingly
+        activeAllianceColorHex = AllianceHelpers.getAllianceColor();
+        if (activeAllianceColorHex.equals("#FF0000")) { // Red Alliance
+            activeHubTags = RedHubTags;
+            activetrenchTags = RedTrenchTags;
+        } else if (activeAllianceColorHex.equals("#0000FF")) { // Blue Alliance
+            activeHubTags = BlueHubTags;
+            activetrenchTags = BlueTrenchTags;
+        } else {
+            activeHubTags = null;
+            activetrenchTags = null;
     private final double maxLockOnDistance = 0.5;
 
     public LimeLightSubsystem(DriveSubsystem driveSubsystem) {
@@ -75,7 +109,7 @@ public class LimeLightSubsystem extends SubsystemBase {
         // Look for the last result that has a valid target
         if (result != null && result.targets_Fiducials.length > 0) {
             for (LimelightHelpers.LimelightTarget_Fiducial target : result.targets_Fiducials) {
-                if (Arrays.stream(rebuiltTags).anyMatch(id -> id == target.fiducialID)) {
+                if (Arrays.stream(activeHubTags).anyMatch(id -> id == target.fiducialID)) {
                     currentLock = target;
                     lastUpdateTime = currentTime;
                     break;
@@ -95,30 +129,28 @@ public class LimeLightSubsystem extends SubsystemBase {
 
         // if(Math.abs(m_gyro.getRate()) > 720) // if our angular velocity is greater
         // than 720 degrees per second, ignore vision updates
-        if (m_gyro != null) {
-            if (Math.abs(m_gyro.getAngularVelocityZWorld().getValueAsDouble()) > 720) // if our angular velocity is
-                                                                                      // greater than 720 degrees per
-                                                                                      // second, ignore vision updates
-            {
-                doRejectUpdate = true;
-            }
-            if (mt2.tagCount == 0) {
-                doRejectUpdate = true;
-            }
-            if (!doRejectUpdate) {
-                m_poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 9999999));
-                m_poseEstimator.addVisionMeasurement(
-                        mt2.pose,
-                        mt2.timestampSeconds);
-            }
+        if (Math.abs(m_gyro.getAngularVelocityZWorld().getValueAsDouble()) > 720) // if our angular velocity is greater
+                                                                                  // than 720 degrees per second, ignore
+                                                                                  // vision updates
+        {
+            doRejectUpdate = true;
+        }
+        if (mt2.tagCount == 0) {
+            doRejectUpdate = true;
+        }
+        if (!doRejectUpdate) {
+            m_poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 9999999));
+            m_poseEstimator.addVisionMeasurement(
+                    mt2.pose,
+                    mt2.timestampSeconds);
         }
     }
 
-    public void attemptReefLockon() {
+    public void attemptHubLockon() {
         System.out.println("fiducials length=" + result.targets_Fiducials.length);
         if (result != null && result.targets_Fiducials.length > 0) {
             for (LimelightHelpers.LimelightTarget_Fiducial target : result.targets_Fiducials) {
-                if (Arrays.stream(rebuiltTags).anyMatch(id -> id == target.fiducialID)) {
+                if (Arrays.stream(activeHubTags).anyMatch(id -> id == target.fiducialID)) {
                     double distance = get2dDistance(target);
                     if (distance < maxLockOnDistance && distance < currentLockDistance) {
                         currentLock = target;
