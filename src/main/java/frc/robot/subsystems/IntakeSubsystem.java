@@ -47,7 +47,8 @@ public void stopIntakeRollers(){
 public void reverseIntakeRollers(){
   //Reverses the Intake rollers to get stuff unstuck
   System.out.println("[INTAKE] Rollers reversed");
-  m_intakeMotor.set(-IntakeConstants.kIntakeMotorSpeed);
+  m_intakeMotor.set(-IntakeConstants.kIntakeReverseMotorSpeed);
+  
 }
 
   @Override

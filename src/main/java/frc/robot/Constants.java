@@ -144,6 +144,7 @@ public final class Constants {
   public static final class IntakeConstants {
     public static final int kIntakeCanId = 28;
     public static final double kIntakeMotorSpeed = 0.5;
+    public static final double kIntakeReverseMotorSpeed = 0.1;
     public static final double kIntakeDelay = 1.5;
   }
 
