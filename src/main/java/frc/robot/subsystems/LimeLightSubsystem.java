@@ -8,7 +8,6 @@ import java.util.Arrays;
 import com.ctre.phoenix6.hardware.Pigeon2;
 
 //import edu.wpi.first.math.geometry.Transform3d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.wpilibj.Timer;
@@ -89,6 +88,20 @@ public class LimeLightSubsystem extends SubsystemBase {
     public void update() {
         double currentTime = Timer.getFPGATimestamp();
         result = LimelightHelpers.getLatestResults(limelightCam);
+        // Look for the last result that has a valid target
+        if (result != null && result.targets_Fiducials.length > 0) {
+            int index = -1;
+            for (LimelightHelpers.LimelightTarget_Fiducial target : result.targets_Fiducials) {
+                if (Arrays.stream(activeHubTags).anyMatch(id -> id == target.fiducialID)) {
+                    currentLock = target;
+                    lastUpdateTime = currentTime;
+                    index += 1;
+                    System.out.println("index = 0" + index + ", id = "+ target.fiducialID);
+                    break;
+                }
+            }
+            System.out.println("target found");
+        }
         if (result.targets_Fiducials.length == 0)
             return;
         System.out.println(" result = " + result.targets_Fiducials.length);
@@ -100,18 +113,6 @@ public class LimeLightSubsystem extends SubsystemBase {
         if (currentLock != null && (currentTime - lastUpdateTime > bufferTime)) {
             currentLock = null;
             currentLockDistance = Double.MAX_VALUE;
-        }
-
-        // Look for the last result that has a valid target
-        if (result != null && result.targets_Fiducials.length > 0) {
-            for (LimelightHelpers.LimelightTarget_Fiducial target : result.targets_Fiducials) {
-                if (Arrays.stream(activeHubTags).anyMatch(id -> id == target.fiducialID)) {
-                    currentLock = target;
-                    lastUpdateTime = currentTime;
-                    break;
-                }
-            }
-            System.out.println("target found");
         }
     }
 
@@ -125,9 +126,11 @@ public class LimeLightSubsystem extends SubsystemBase {
 
         // if(Math.abs(m_gyro.getRate()) > 720) // if our angular velocity is greater
         // than 720 degrees per second, ignore vision updates
-        if (m_gyro != null && Math.abs(m_gyro.getAngularVelocityZWorld().getValueAsDouble()) > 720) // if our angular velocity is greater
-                                                                                  // than 720 degrees per second, ignore
-                                                                                  // vision updates
+        if (m_gyro != null && Math.abs(m_gyro.getAngularVelocityZWorld().getValueAsDouble()) > 720) // if our angular
+                                                                                                    // velocity is
+                                                                                                    // greater
+        // than 720 degrees per second, ignore
+        // vision updates
         {
             doRejectUpdate = true;
         }
@@ -183,8 +186,8 @@ public class LimeLightSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-        // System.out.println("id=" +
-        // NetworkTableInstance.getDefault().getTable("limelight").getEntry("tid").getInteger(0));
+        System.out.println(
+                "id=" + NetworkTableInstance.getDefault().getTable("limelight-tread").getEntry("tid").getInteger(0));
         update();
         if (currentLock != null) {
             // SmartDashboard.putNumber("Apriltag ID", getApriltagID());
@@ -202,7 +205,7 @@ public class LimeLightSubsystem extends SubsystemBase {
         // ty double Vertical Offset From Crosshair To Target (LL1: -20.5 degrees to
         // 20.5 degrees / LL2: -24.85 to 24.85 degrees)
         // double tv =
-        // NetworkTableInstance.getDefault().getTable("limelightCam").getEntry("tv").getDouble(0);
+        NetworkTableInstance.getDefault().getTable("limelightCam").getEntry("tv").getDouble(0);
         // double tx =
         // NetworkTableInstance.getDefault().getTable("limelightCam").getEntry("tx").getDouble(0);
         // double ty =
