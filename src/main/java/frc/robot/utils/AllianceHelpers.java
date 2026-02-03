@@ -14,7 +14,6 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 /** Add your docs here. */
 public class AllianceHelpers {
     private AllianceHelpers() {}
-     // TO DO: Create function to get alliance color tags from field management
   // System (FMS) and store variable in network tables as hex, so it can be
   // displayed on the Elastic dashboard using a Color View widget
   public static void setAllianceColor() {
