@@ -261,7 +261,7 @@ public class RobotContainer {
    * X -> Latch Hook on climber (toggle) DONE
    * Y -> Lock onto hub (hold)
    * LB -> Reverse Intake Rollers (hold)
-   * RB -> Indexer start/stop (toggle)
+   * RB -> Indexer start/stop (toggle) DONE
    * LeftJoystick ->
    * LeftJoystickClick ->
    * RightJoystick -> Aim launcher

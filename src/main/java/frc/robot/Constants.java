@@ -139,6 +139,13 @@ public final class Constants {
     public static final double kIndexerDelay = 1.5;
   }
 
+  public static final class IntakeConstants {
+    public static final int kIntakeCanId = 28;
+    public static final double kIntakeMotorSpeed = 0.5;
+    public static final double kIntakeDelay = 1.5;
+  }
+
+
   public static final class LedConstants {
     public static final int kPwmPort = 9;
     public static final int kTotalLeds = 164; // 60 LEDs per Meter for 2.74 meters (27in x 4)
