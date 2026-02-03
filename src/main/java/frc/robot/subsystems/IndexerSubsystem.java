@@ -54,7 +54,7 @@ public class IndexerSubsystem extends SubsystemBase {
   public void reverseIndexer() {
     m_buttonState = false;
     m_indexerOn = true;
-    m_indexerMotor.set(-IndexerConstants.kIndexerMotorSpeed);
+    m_indexerMotor.set(-IndexerConstants.kIndexerReverseMotorSpeed);
   }
 
   @Override
