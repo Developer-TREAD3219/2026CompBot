@@ -42,15 +42,22 @@ public class LauncherSubsystem extends SubsystemBase {
     m_krakenMotorFollower.getConfigurator().apply(motorOutputFollower);
   }
 
-  public void startLauncher(double speed) {
+  public void startLauncher() {
     // Starts the motor to the set value
-    System.out.println("Launcher Motor Speed Set to: " + speed);
-    m_krakenMotorMaster.set(speed);
+    System.out.println("Launcher Motor Speed Set to: " + LauncherConstants.kLauncherMotorSpeed);
+    m_krakenMotorMaster.set(LauncherConstants.kLauncherMotorSpeed);
   }
 
   public void stopLauncher() {
     // Stops the motor
     m_krakenMotorMaster.set(0);
+  }
+
+  // TO DO: Add method to run launcher in reverse if needed AND CONNECT TO XBOX BUTTON
+
+  public void reverseLauncher() {
+    System.out.println("Launcher Motor Reversing");
+    m_krakenMotorMaster.set(-LauncherConstants.kLauncherMotorSpeed);
   }
 
   @Override

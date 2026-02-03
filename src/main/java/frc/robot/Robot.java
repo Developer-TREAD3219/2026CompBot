@@ -77,6 +77,7 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void autonomousInit() {
+    // TO DO create routine to move forward 2 feet and then shoot balls (run launcher, indexer, upper indexer)
     if (!Constants.kTestMode) {
       // Calls function to get alliance color tags
       AllianceHelpers.setAllianceColor();

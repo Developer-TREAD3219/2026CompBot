@@ -22,7 +22,6 @@ import edu.wpi.first.wpilibj.PS4Controller.Button;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.IndexerConstants;
-import frc.robot.Constants.LauncherConstants;
 import frc.robot.Constants.States;
 import frc.robot.Constants.OIConstants;
 import frc.robot.commands.LauncherCommands.Launch;
@@ -37,6 +36,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
@@ -110,7 +110,7 @@ public class RobotContainer {
 
       Trigger launchTrigger = new Trigger(this::launchRequested);
       launchTrigger.whileTrue(new InstantCommand(
-          () -> m_launcherSubsystem.startLauncher(LauncherConstants.kLauncherMotorSpeed), m_launcherSubsystem)
+          () -> m_launcherSubsystem.startLauncher(), m_launcherSubsystem)
           .andThen(new WaitCommand(IndexerConstants.kIndexerDelay))
           .andThen(new InstantCommand(
               () -> m_robotIndexer.startIndexerMotor(), m_robotIndexer)));
@@ -221,10 +221,27 @@ public class RobotContainer {
             .withTimeout(5)
             .andThen(() -> m_robotClimber.stopClimber()));
 
+    // While the left Dpad is held, the indexer runs in reverse, and when released
+    // it goes to positive agin
+    Trigger reverseIndexerTrigger = new Trigger(this::reverseIndexerRequested);
+    reverseIndexerTrigger.whileTrue(
+        new StartEndCommand(
+          () -> m_robotIndexer.reverseIndexer(),
+          () -> m_robotIndexer.startIndexerMotor(),
+          m_robotIndexer));
+
+    //While the right Dpad is held, the launcher runs in reverse, and when released it it goes to positive again
+    Trigger reverseLauncherTrigger = new Trigger(this::reverseLauncherRequested);
+    reverseLauncherTrigger.whileTrue(
+        new StartEndCommand(
+          () -> m_launcherSubsystem.reverseLauncher(),
+          () -> m_launcherSubsystem.startLauncher(),
+          m_launcherSubsystem));
+
     // The right trigger while held runs the launcher motors
     Trigger launchTrigger = new Trigger(this::launchRequested);
     launchTrigger.whileTrue(new InstantCommand(
-        () -> m_launcherSubsystem.startLauncher(LauncherConstants.kLauncherMotorSpeed), m_launcherSubsystem));
+        () -> m_launcherSubsystem.startLauncher(), m_launcherSubsystem));
     launchTrigger.onFalse(new InstantCommand(() -> m_launcherSubsystem.stopLauncher(), m_launcherSubsystem));
     // The left trigger while held runs the intake rollers
     Trigger intakeTrigger = new Trigger(this::intakeRequested);
@@ -251,8 +268,8 @@ public class RobotContainer {
    * RightJoystickClick ->
    * DPad Up -> Climber extend (hold) DONE
    * DPad Down -> Climber retract (hold) DONE
-   * DPad Left ->
-   * DPad Right ->
+   * DPad Left -> Reverse Indexer (hold)
+   * DPad Right -> Reverse launcher (hold)
    * LeftTrigger -> Start/stop Intake Rollers (toggle) DONE
    * RightTrigger -> Launch fuel (hold) DONE
    * StartButton -> Start/Stop launcher motors (toggle) DONE
@@ -298,6 +315,16 @@ public class RobotContainer {
   // Check if DPad Down is pressed on the gunner controller
   public boolean retractClimberRequested() {
     return m_gunnerController.getPOV() == 180;
+  }
+
+  // Check if DPad Left is pressed on the gunner controller
+  public boolean reverseIndexerRequested() {
+    return m_gunnerController.getPOV() == 270;
+  }
+  
+  // Check if DPad Right is pressed on the gunner controller
+  public boolean reverseLauncherRequested() {
+    return m_gunnerController.getPOV() == 90;
   }
 
   /**
