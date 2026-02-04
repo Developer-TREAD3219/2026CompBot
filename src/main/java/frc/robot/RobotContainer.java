@@ -102,45 +102,7 @@ public class RobotContainer {
     }
 
     // Configure the button bindings
-    if (!Constants.kTestMode) {
-      configureButtonBindings();
-    } else {
-      new JoystickButton(m_gunnerController, XboxController.Button.kY.value)
-          .whileTrue(new RunCommand(() -> m_robotTurret.lockOntoHub(), m_robotTurret));
-
-      Trigger launchTrigger = new Trigger(this::launchRequested);
-      launchTrigger.whileTrue(new InstantCommand(
-          () -> m_launcherSubsystem.startLauncher(), m_launcherSubsystem)
-          .andThen(new WaitCommand(IndexerConstants.kIndexerDelay))
-          .andThen(new InstantCommand(
-              () -> m_robotIndexer.startIndexerMotor(), m_robotIndexer)));
-
-      launchTrigger.onFalse(new InstantCommand(() -> m_launcherSubsystem.stopLauncher(), m_launcherSubsystem).andThen(
-          () -> m_robotIndexer.stopIndexerMotor(), m_robotIndexer));
-
-      Trigger extendClimberTrigger = new Trigger(this::extendClimberRequested);
-      extendClimberTrigger.onTrue(
-          new RunCommand(() -> m_robotClimber.extendClimber(0.5), m_robotClimber)
-              .withTimeout(5)
-              .andThen(() -> m_robotClimber.stopClimber()));
-      // DPad Down retracts climber for 5 seconds when pressed
-      Trigger retractClimberTrigger = new Trigger(this::retractClimberRequested);
-      retractClimberTrigger.onTrue(
-          new RunCommand(() -> m_robotClimber.retractClimber(0.5), m_robotClimber)
-              .withTimeout(5)
-              .andThen(() -> m_robotClimber.stopClimber()));
-
-      // Toggle on release
-      new JoystickButton(m_gunnerController, XboxController.Button.kRightBumper.value)
-          .onTrue(new RunCommand(() -> m_robotIndexer.buttonPress(), m_robotIndexer));
-      new JoystickButton(m_gunnerController, XboxController.Button.kRightBumper.value)
-          .onFalse(new RunCommand(() -> m_robotIndexer.buttonRelease(), m_robotIndexer));
-
-      // The left trigger while held runs the intake rollers
-      Trigger intakeTrigger = new Trigger(this::intakeRequested);
-      intakeTrigger.onTrue(new InstantCommand(() -> m_robotIntake.startIntakeRollers(), m_robotIntake));
-      intakeTrigger.onFalse(new InstantCommand(() -> m_robotIntake.stopIntakeRollers(), m_robotIntake));
-    }
+    configureButtonBindings();
 
     // Configure default commands
     if (m_robotDrive != null) {
@@ -170,50 +132,36 @@ public class RobotContainer {
     /*
      * DRIVER CONTROLS
      */
-    new JoystickButton(m_driverController, Button.kR1.value)
-        .whileTrue(new RunCommand(
-            () -> m_robotDrive.setX(),
-            m_robotDrive));
+    if (!Constants.kTestMode) {
+      new JoystickButton(m_driverController, Button.kR1.value)
+          .whileTrue(new RunCommand(
+              () -> m_robotDrive.setX(),
+              m_robotDrive));
 
-    new JoystickButton(m_driverController, XboxController.Button.kStart.value)
-        .onTrue(new InstantCommand(
-            () -> m_robotDrive.zeroHeading(),
-            m_robotDrive));
+      new JoystickButton(m_driverController, XboxController.Button.kStart.value)
+          .onTrue(new InstantCommand(
+              () -> m_robotDrive.zeroHeading(),
+              m_robotDrive));
+    }
 
-    /*
-     * GUNNER CONTROLS
-     */
-    // A button toggles intake extensions (drops or retracts)
-    new JoystickButton(m_gunnerController, XboxController.Button.kA.value)
-        .onTrue(new RunCommand(() -> m_robotIntake.toggleIntakeExtentions(), m_robotIntake));
-    // B button while held tracks outpost with limelight to shoot into alliance zone
-    new JoystickButton(m_gunnerController, XboxController.Button.kB.value)
-        .whileTrue(new RunCommand(() -> m_robotTurret.setAllianceZoneLock(), m_robotTurret));
-    // X button toggles latch hook on climber
-    new JoystickButton(m_gunnerController, XboxController.Button.kX.value)
-        .onTrue(new RunCommand(() -> m_robotClimber.toggleHookLatch(), m_robotClimber));
-    // Y button while held locks onto the AprilTag on the Hub
     new JoystickButton(m_gunnerController, XboxController.Button.kY.value)
         .whileTrue(new RunCommand(() -> m_robotTurret.lockOntoHub(), m_robotTurret));
-    // Left Bumper while held runs intake rollers in reverse
-    new JoystickButton(m_gunnerController, XboxController.Button.kLeftBumper.value)
-        .whileTrue(new RunCommand(() -> m_robotIntake.reverseIntakeRollers(), m_robotIntake));
-    // Start button starts/stops launcher motors
-    new JoystickButton(m_gunnerController, XboxController.Button.kStart.value)
-        .onTrue(new RunCommand(() -> m_robotTurret.startStopLauncherMotors(), m_robotTurret));
-    // Right Bumper toggles indexer start/stop
 
-    // new JoystickButton(m_gunnerController,
-    // XboxController.Button.kRightStick.value)
-    // .whileTrue(new RunCommand(() -> m_robotTurret.aimLauncher(), m_robotTurret));
+    Trigger launchTrigger = new Trigger(this::launchRequested);
+    launchTrigger.whileTrue(new InstantCommand(
+        () -> m_launcherSubsystem.startLauncher(), m_launcherSubsystem)
+        .andThen(new WaitCommand(IndexerConstants.kIndexerDelay))
+        .andThen(new InstantCommand(
+            () -> m_robotIndexer.startIndexerMotor(), m_robotIndexer)));
 
-    // DPad Up extends climber for 5 seconds when pressed
+    launchTrigger.onFalse(new InstantCommand(() -> m_launcherSubsystem.stopLauncher(), m_launcherSubsystem).andThen(
+        () -> m_robotIndexer.stopIndexerMotor(), m_robotIndexer));
+
     Trigger extendClimberTrigger = new Trigger(this::extendClimberRequested);
     extendClimberTrigger.onTrue(
         new RunCommand(() -> m_robotClimber.extendClimber(0.5), m_robotClimber)
             .withTimeout(5)
             .andThen(() -> m_robotClimber.stopClimber()));
-
     // DPad Down retracts climber for 5 seconds when pressed
     Trigger retractClimberTrigger = new Trigger(this::retractClimberRequested);
     retractClimberTrigger.onTrue(
@@ -221,32 +169,34 @@ public class RobotContainer {
             .withTimeout(5)
             .andThen(() -> m_robotClimber.stopClimber()));
 
+    // Toggle on release
+    new JoystickButton(m_gunnerController, XboxController.Button.kRightBumper.value)
+        .onTrue(new RunCommand(() -> m_robotIndexer.buttonPress(), m_robotIndexer));
+    new JoystickButton(m_gunnerController, XboxController.Button.kRightBumper.value)
+        .onFalse(new RunCommand(() -> m_robotIndexer.buttonRelease(), m_robotIndexer));
+
     // While the left Dpad is held, the indexer runs in reverse, and when released
     // it goes to positive agin
     Trigger reverseIndexerTrigger = new Trigger(this::reverseIndexerRequested);
     reverseIndexerTrigger.whileTrue(
         new StartEndCommand(
-          () -> m_robotIndexer.reverseIndexer(),
-          () -> m_robotIndexer.startIndexerMotor(),
-          m_robotIndexer));
+            () -> m_robotIndexer.reverseIndexer(),
+            () -> m_robotIndexer.stopIndexerMotor(),
+            m_robotIndexer));
 
-    //While the right Dpad is held, the launcher runs in reverse, and when released it it goes to positive again
     Trigger reverseLauncherTrigger = new Trigger(this::reverseLauncherRequested);
     reverseLauncherTrigger.whileTrue(
         new StartEndCommand(
-          () -> m_launcherSubsystem.reverseLauncher(),
-          () -> m_launcherSubsystem.startLauncher(),
-          m_launcherSubsystem));
+            () -> m_launcherSubsystem.reverseLauncher(),
+            () -> m_launcherSubsystem.stopLauncher(),
+            m_launcherSubsystem));
 
-    // The right trigger while held runs the launcher motors
-    Trigger launchTrigger = new Trigger(this::launchRequested);
-    launchTrigger.whileTrue(new InstantCommand(
-        () -> m_launcherSubsystem.startLauncher(), m_launcherSubsystem));
-    launchTrigger.onFalse(new InstantCommand(() -> m_launcherSubsystem.stopLauncher(), m_launcherSubsystem));
     // The left trigger while held runs the intake rollers
     Trigger intakeTrigger = new Trigger(this::intakeRequested);
     intakeTrigger.onTrue(new InstantCommand(() -> m_robotIntake.startIntakeRollers(), m_robotIntake));
     intakeTrigger.onFalse(new InstantCommand(() -> m_robotIntake.stopIntakeRollers(), m_robotIntake));
+    new JoystickButton(m_gunnerController, XboxController.Button.kLeftBumper.value)
+        .whileTrue(new RunCommand(() -> m_robotIntake.reverseIntakeRollers(), m_robotIntake));
 
     // TODO: Driver controls
     // new JoystickButton(m_driverController,
@@ -321,7 +271,7 @@ public class RobotContainer {
   public boolean reverseIndexerRequested() {
     return m_gunnerController.getPOV() == 270;
   }
-  
+
   // Check if DPad Right is pressed on the gunner controller
   public boolean reverseLauncherRequested() {
     return m_gunnerController.getPOV() == 90;
