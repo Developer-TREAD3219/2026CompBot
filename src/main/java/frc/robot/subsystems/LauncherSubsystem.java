@@ -57,7 +57,7 @@ public class LauncherSubsystem extends SubsystemBase {
 
   public void reverseLauncher() {
     System.out.println("Launcher Motor Reversing");
-    m_krakenMotorMaster.set(-LauncherConstants.kLauncherMotorSpeed);
+    m_krakenMotorMaster.set(-LauncherConstants.kLauncherReverseMotorSpeed);
   }
 
   @Override

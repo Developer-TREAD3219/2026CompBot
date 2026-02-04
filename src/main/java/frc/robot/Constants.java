@@ -127,6 +127,7 @@ public final class Constants {
     public static final int kLauncherMotorFollower = 21;
 
     public static final double kLauncherMotorSpeed = 0.05;
+    public static final double kLauncherReverseMotorSpeed = 0.01;
   }
 
   public static final class ClimberConstants {
@@ -137,6 +138,14 @@ public final class Constants {
     public static final int kIndexerCanId = 26;
     public static final double kIndexerMotorSpeed = 0.5;
     public static final double kIndexerDelay = 1.5;
+    public static final double kIndexerReverseMotorSpeed = 0.1;
+  }
+
+  public static final class IntakeConstants {
+    public static final int kIntakeCanId = 28;
+    public static final double kIntakeMotorSpeed = 0.5;
+    public static final double kIntakeReverseMotorSpeed = 0.1;
+    public static final double kIntakeDelay = 1.5;
   }
 
   public static final class LedConstants {
