@@ -28,6 +28,7 @@ import frc.robot.commands.LauncherCommands.Launch;
 import frc.robot.subsystems.ClimberSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.IndexerSubsystem;
+import frc.robot.subsystems.UpperIndexerSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.LauncherSubsystem;
 import frc.robot.subsystems.LimeLightSubsystem;
@@ -75,6 +76,7 @@ public class RobotContainer {
   private final LimeLightSubsystem m_Limelight;
   private final IndexerSubsystem m_robotIndexer;
   private final LauncherSubsystem m_launcherSubsystem;
+  private final UpperIndexerSubsystem m_UpperIndexerSubsystem;
 
   // The driver's controller
   XboxController m_driverController = new XboxController(OIConstants.kDriverControllerPort);
@@ -97,6 +99,7 @@ public class RobotContainer {
       m_robotDrive = null;
       m_robotIntake = new IntakeSubsystem();
       m_robotIndexer = new IndexerSubsystem();
+      m_UpperIndexerSubsystem = new UpperIndexerSubsystem();
       m_robotTurret = new TurretSubsystem();
       m_Limelight = new LimeLightSubsystem(m_robotDrive);
     }
@@ -283,6 +286,31 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
+
+//   /**
+//    * Use this to pass the autonomous command to the main {@link Robot} class.
+//    *
+//    * @return the command to run in autonomous
+//    */
+//     return autoChooser.getSelected();
+
+/*
+ * Autonomouse to start launcher, move forward 2 feet, then run upper indexer, then run indexer, wait 4 seconds, then stop motors.
+ */
+// Command m_autonomousCommand;
+//     m_autonomousCommand = 
+//     // new PathPlannerAuto("Dead Ahead")
+//       // .andThen(() -> m_ElevatorSubsystem.goToElevatorL2(), m_ElevatorSubsystem)
+//       new InstantCommand(() -> m_launcherSubsystem.startLauncher(), m_launcherSubsystem)
+//       // .andthen(m_robotDrive.)
+//       .andThen(() -> m_UpperIndexerSubsystem.startUpperIndexerMotor(), m_UpperIndexerSubsystem)
+//       .andThen(() -> m_robotIndexer.startIndexerMotor(), m_robotIndexer)
+//       .andThen(Commands.waitSeconds(4))
+//       .andThen(() -> m_robotIndexer.stopIndexerMotor(), m_robotIndexer)
+//       .andThen(() -> m_UpperIndexerSubsystem.stopUpperIndexerMotor(), m_UpperIndexerSubsystem)
+//       .andThen(() -> m_launcherSubsystem.stopLauncher(), m_launcherSubsystem);
+//     return m_autonomousCommand;
+
     // Create config for trajectory
     TrajectoryConfig config = new TrajectoryConfig(
         AutoConstants.kMaxSpeedMetersPerSecond,
@@ -322,4 +350,5 @@ public class RobotContainer {
     // Run path following command, then stop at the end.
     return swerveControllerCommand.andThen(() -> m_robotDrive.drive(0, 0, 0, false));
   }
+
 }
