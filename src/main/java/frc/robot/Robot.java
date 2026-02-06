@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.utils.AllianceHelpers;
+import edu.wpi.first.cameraserver.CameraServer;
 
 /**
  * The methods in this class are called automatically corresponding to each
@@ -38,6 +39,11 @@ public class Robot extends TimedRobot {
     // autonomous chooser on the dashboard.
     // Set the data
     m_robotContainer = new RobotContainer();
+  }
+
+  public void robotInit() {
+    // Start camera
+    CameraServer.startAutomaticCapture();
   }
 
   /**
@@ -92,6 +98,8 @@ public class Robot extends TimedRobot {
     }
     
     // TO DO create routine to move forward 2 feet and then shoot balls (run launcher, indexer, upper indexer)
+    // TO DO create routine to move forward 2 feet and then shoot balls (run
+    // launcher, indexer, upper indexer)
     if (!Constants.kTestMode) {
       // Calls function to get alliance color tags
       AllianceHelpers.setAllianceColor();
