@@ -141,6 +141,12 @@ public final class Constants {
     public static final double kIndexerReverseMotorSpeed = 0.1;
   }
 
+  public static final class UpperIndexerConstants {
+    public static final int kUpperIndexerCanId = 27;
+    public static final double kUpperIndexerMotorSpeed = 0.5;
+    public static final double kUpperIndexerReverseMotorSpeed = 0.1;
+  }
+
   public static final class IntakeConstants {
     public static final int kIntakeCanId = 28;
     public static final double kIntakeMotorSpeed = 0.5;
