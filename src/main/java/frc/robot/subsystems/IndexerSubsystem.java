@@ -50,7 +50,7 @@ public class IndexerSubsystem extends SubsystemBase {
     m_indexerMotor.set(0);
   }
 
-  // TO DO Add method to run indexer in reverse if needed  AND CONNECT TO XBOX BUTTON
+  // Run indexer in reverse if needed  AND CONNECT TO XBOX BUTTON
   public void reverseIndexer() {
     m_buttonState = false;
     m_indexerOn = true;

@@ -23,6 +23,7 @@ public class ClimberSubsystem extends SubsystemBase {
 
   public void toggleHookLatch() {
     // Code to toggle the hook latch mechanism
+    // TO DO: add code once we have a hook latch mechanism, for now just toggle the boolean and print to console
     if (m_hookLatched == true) {
       System.out.println("[CLIMBER] Unlatch hook");
       m_hookLatched = false;
@@ -31,7 +32,7 @@ public class ClimberSubsystem extends SubsystemBase {
       m_hookLatched = true;
     }
   }
-
+// TO DO: add code to limit the extension and retraction of the climber, either through encoder values or limit switches, to prevent damage to the mechanism. For now, we will just have the motors run at the given speed when extending or retracting, and stop when the stopClimber function is called.
   public void extendClimber(double speed) {
     // Code to extend the climber mechanism
     System.out.println("[CLIMBER] Extending climber");
@@ -41,7 +42,7 @@ public class ClimberSubsystem extends SubsystemBase {
     // stopMotors();
     // }
   }
-
+// TO DO: add code to limit the extension and retraction of the climber, either through encoder values or limit switches, to prevent damage to the mechanism. For now, we will just have the motors run at the given speed when extending or retracting, and stop when the stopClimber function is called.
   public void retractClimber(double speed) {
     // Code to retract the climber mechanism
     System.out.println("[CLIMBER] Retracting climber");

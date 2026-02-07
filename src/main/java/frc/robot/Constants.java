@@ -86,6 +86,9 @@ public final class Constants {
     public static final int kDriverControllerPort = 0;
     public static final int kGunnerControllerPort = 1;
     public static final double kDriveDeadband = 0.05;
+
+    public static final double kLeftTriggerThreshhold = 0.9;
+    public static final double kRightTriggerThreshhold = 0.9;
   }
 
   public static final class AutoConstants {
@@ -132,6 +135,8 @@ public final class Constants {
 
   public static final class ClimberConstants {
     public static final int kClimberMotorCanId = 25;
+    public static final double kClimberMotorSpeed = 0.5;
+    public static final double kClimberReverseMotorSpeed = 0.1;
   }
 
   public static final class IndexerConstants {
@@ -157,6 +162,13 @@ public final class Constants {
   public static final class LedConstants {
     public static final int kPwmPort = 9;
     public static final int kTotalLeds = 164; // 60 LEDs per Meter for 2.74 meters (27in x 4)
+  }
+
+  public static final class dPadConstants {
+    public static final int kDPadUp = 0;
+    public static final int kDPadRight = 90;
+    public static final int kDPadDown = 180;
+    public static final int kDPadLeft = 270;
   }
 
   public static class States {

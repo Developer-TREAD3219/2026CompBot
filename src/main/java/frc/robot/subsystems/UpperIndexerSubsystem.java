@@ -27,8 +27,7 @@ public class UpperIndexerSubsystem extends SubsystemBase {
     m_UpperindexerMotor.set(0);
   }
 
-  // TO DO Add method to run indexer in reverse if needed AND CONNECT TO XBOX
-  // BUTTON
+  // Run indexer in reverse if needed AND CONNECT TO XBOX BUTTON
   public void reverseUpperIndexer() {
     m_UpperindexerMotor.set(-UpperIndexerConstants.kUpperIndexerReverseMotorSpeed);
   }

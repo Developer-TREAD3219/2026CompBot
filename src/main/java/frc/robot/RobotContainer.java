@@ -21,7 +21,9 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.PS4Controller.Button;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveConstants;
+import frc.robot.Constants.dPadConstants;
 import frc.robot.Constants.IndexerConstants;
+import frc.robot.Constants.LauncherConstants;
 import frc.robot.Constants.States;
 import frc.robot.Constants.OIConstants;
 import frc.robot.commands.LauncherCommands.Launch;
@@ -151,32 +153,63 @@ public class RobotContainer {
         .whileTrue(new RunCommand(() -> m_robotTurret.lockOntoHub(), m_robotTurret));
 
     Trigger launchTrigger = new Trigger(this::launchRequested);
-    launchTrigger.whileTrue(new InstantCommand(
-        () -> m_launcherSubsystem.startLauncher(), m_launcherSubsystem)
-        .andThen(new WaitCommand(IndexerConstants.kIndexerDelay))
-        .andThen(new InstantCommand(
-            () -> m_robotIndexer.startIndexerMotor(), m_robotIndexer)));
+    // Launcher (toggle) & indexer (on a delay)
+    // launchTrigger.toggleOnTrue(Commands.sequence(
+    // new InstantCommand(() -> m_launcherSubsystem.startLauncher(),
+    // m_launcherSubsystem),
 
+    // new WaitCommand(IndexerConstants.kIndexerDelay),
+
+    // new StartEndCommand(
+    // () -> m_robotIndexer.startIndexerMotor(),
+    // () -> {
+    // m_robotIndexer.stopIndexerMotor();
+    // m_launcherSubsystem.stopLauncher();
+    // },
+    // m_robotIndexer, m_launcherSubsystem)));
+
+    launchTrigger.toggleOnTrue(
+        new StartEndCommand(
+            () -> m_launcherSubsystem.startLauncher(),
+            () -> m_launcherSubsystem.stopLauncher(),
+            m_launcherSubsystem));
+
+    // Indexer
     launchTrigger.onFalse(new InstantCommand(() -> m_launcherSubsystem.stopLauncher(), m_launcherSubsystem).andThen(
         () -> m_robotIndexer.stopIndexerMotor(), m_robotIndexer));
 
+    // Extend Climber
+    // TO DO: add a function isFullyExtended to check if fully extended, 
+    //              don't bother turning timeoout into a constant, since we will change it when we add the isFullyExtended function
     Trigger extendClimberTrigger = new Trigger(this::extendClimberRequested);
     extendClimberTrigger.onTrue(
-        new RunCommand(() -> m_robotClimber.extendClimber(0.5), m_robotClimber)
+        new RunCommand(() -> m_robotClimber.extendClimber(Constants.ClimberConstants.kClimberMotorSpeed), m_robotClimber)
             .withTimeout(5)
             .andThen(() -> m_robotClimber.stopClimber()));
-    // DPad Down retracts climber for 5 seconds when pressed
+    // Retract Climber
+    // TO DO (later): Add fully reatracted function isFulylRetracted to check if fully retracted
     Trigger retractClimberTrigger = new Trigger(this::retractClimberRequested);
-    retractClimberTrigger.onTrue(
-        new RunCommand(() -> m_robotClimber.retractClimber(0.5), m_robotClimber)
-            .withTimeout(5)
-            .andThen(() -> m_robotClimber.stopClimber()));
+    retractClimberTrigger.whileTrue(
+        new StartEndCommand(
+            () -> m_robotClimber.retractClimber(Constants.ClimberConstants.kClimberReverseMotorSpeed),
+            () -> m_robotClimber.stopClimber(),
+            m_robotClimber));
 
-    // Toggle on release
+    // Toggle on and off to run both upper and lower indexer motor, instead
+    // of just while held
+    // new JoystickButton(m_gunnerController,
+    // XboxController.Button.kRightBumper.value)
+    // .onTrue(new RunCommand(() -> m_robotIndexer.buttonPress(), m_robotIndexer));
+    // new JoystickButton(m_gunnerController,
+    // XboxController.Button.kRightBumper.value)
+    // .onFalse(new RunCommand(() -> m_robotIndexer.buttonRelease(),
+    // m_robotIndexer));
+
     new JoystickButton(m_gunnerController, XboxController.Button.kRightBumper.value)
-        .onTrue(new RunCommand(() -> m_robotIndexer.buttonPress(), m_robotIndexer));
-    new JoystickButton(m_gunnerController, XboxController.Button.kRightBumper.value)
-        .onFalse(new RunCommand(() -> m_robotIndexer.buttonRelease(), m_robotIndexer));
+        .toggleOnTrue(new StartEndCommand(
+            () -> m_robotIndexer.startIndexerMotor(),
+            () -> m_robotIndexer.stopIndexerMotor(),
+            m_robotIndexer));
 
     // While the left Dpad is held, the indexer runs in reverse, and when released
     // it goes to positive agin
@@ -214,7 +247,8 @@ public class RobotContainer {
    * X -> Latch Hook on climber (toggle) DONE
    * Y -> Lock onto hub (hold)
    * LB -> Reverse Intake Rollers (hold)
-   * RB -> Indexer start/stop (toggle) DONE
+   * RB -> Toggle indexer on and off (TOGGLE) DONE
+   * upper and lower indexer motor, instead of just while held
    * LeftJoystick ->
    * LeftJoystickClick ->
    * RightJoystick -> Aim launcher
@@ -224,7 +258,8 @@ public class RobotContainer {
    * DPad Left -> Reverse Indexer (hold)
    * DPad Right -> Reverse launcher (hold)
    * LeftTrigger -> Start/stop Intake Rollers (toggle) DONE
-   * RightTrigger -> Launch fuel (hold) DONE
+   * RightTrigger -> Toggle launchr on and off (TOGGLE) DONE
+   * launcher motors, instead of just while held
    * StartButton -> Start/Stop launcher motors (toggle) DONE
    * 
    */
@@ -251,33 +286,29 @@ public class RobotContainer {
   // Check if right trigger is pressed on the gunner controller
   // Called by launch Trigger in configureButtonBindings()
   public boolean launchRequested() {
-    return m_gunnerController.getRightTriggerAxis() > 0.9;
+    return m_gunnerController.getRightTriggerAxis() > OIConstants.kRightTriggerThreshhold;
   }
-
   // Check if left trigger is pressed on the gunner controller
   // Called by intake Trigger in configureButtonBindings()
   public boolean intakeRequested() {
-    return m_gunnerController.getLeftTriggerAxis() > 0.9;
+    return m_gunnerController.getLeftTriggerAxis() > OIConstants.kLeftTriggerThreshhold;
   }
 
   // Check if DPad Up is pressed on the gunner controller
   public boolean extendClimberRequested() {
-    return m_gunnerController.getPOV() == 0;
+    return m_gunnerController.getPOV() == dPadConstants.kDPadUp;
   }
-
   // Check if DPad Down is pressed on the gunner controller
   public boolean retractClimberRequested() {
-    return m_gunnerController.getPOV() == 180;
+    return m_gunnerController.getPOV() == dPadConstants.kDPadDown;
   }
-
   // Check if DPad Left is pressed on the gunner controller
   public boolean reverseIndexerRequested() {
-    return m_gunnerController.getPOV() == 270;
+    return m_gunnerController.getPOV() == dPadConstants.kDPadLeft;
   }
-
   // Check if DPad Right is pressed on the gunner controller
   public boolean reverseLauncherRequested() {
-    return m_gunnerController.getPOV() == 90;
+    return m_gunnerController.getPOV() == dPadConstants.kDPadRight;
   }
 
   /**
@@ -287,29 +318,33 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
 
-//   /**
-//    * Use this to pass the autonomous command to the main {@link Robot} class.
-//    *
-//    * @return the command to run in autonomous
-//    */
-//     return autoChooser.getSelected();
+    // /**
+    // * Use this to pass the autonomous command to the main {@link Robot} class.
+    // *
+    // * @return the command to run in autonomous
+    // */
+    // return autoChooser.getSelected();
 
-/*
- * Autonomouse to start launcher, move forward 2 feet, then run upper indexer, then run indexer, wait 4 seconds, then stop motors.
- */
-// Command m_autonomousCommand;
-//     m_autonomousCommand = 
-//     // new PathPlannerAuto("Dead Ahead")
-//       // .andThen(() -> m_ElevatorSubsystem.goToElevatorL2(), m_ElevatorSubsystem)
-//       new InstantCommand(() -> m_launcherSubsystem.startLauncher(), m_launcherSubsystem)
-//       // .andthen(m_robotDrive.)
-//       .andThen(() -> m_UpperIndexerSubsystem.startUpperIndexerMotor(), m_UpperIndexerSubsystem)
-//       .andThen(() -> m_robotIndexer.startIndexerMotor(), m_robotIndexer)
-//       .andThen(Commands.waitSeconds(4))
-//       .andThen(() -> m_robotIndexer.stopIndexerMotor(), m_robotIndexer)
-//       .andThen(() -> m_UpperIndexerSubsystem.stopUpperIndexerMotor(), m_UpperIndexerSubsystem)
-//       .andThen(() -> m_launcherSubsystem.stopLauncher(), m_launcherSubsystem);
-//     return m_autonomousCommand;
+    /*
+     * TO DO: Autonomouse to start launcher, move forward 2 feet, then run upper
+     * indexer, then run indexer, wait 4 seconds, then stop motors.
+     */
+    // Command m_autonomousCommand;
+    // m_autonomousCommand =
+    // // new PathPlannerAuto("Dead Ahead")
+    // // .andThen(() -> m_ElevatorSubsystem.goToElevatorL2(), m_ElevatorSubsystem)
+    // new InstantCommand(() -> m_launcherSubsystem.startLauncher(),
+    // m_launcherSubsystem)
+    // // .andthen(m_robotDrive.)
+    // .andThen(() -> m_UpperIndexerSubsystem.startUpperIndexerMotor(),
+    // m_UpperIndexerSubsystem)
+    // .andThen(() -> m_robotIndexer.startIndexerMotor(), m_robotIndexer)
+    // .andThen(Commands.waitSeconds(4))
+    // .andThen(() -> m_robotIndexer.stopIndexerMotor(), m_robotIndexer)
+    // .andThen(() -> m_UpperIndexerSubsystem.stopUpperIndexerMotor(),
+    // m_UpperIndexerSubsystem)
+    // .andThen(() -> m_launcherSubsystem.stopLauncher(), m_launcherSubsystem);
+    // return m_autonomousCommand;
 
     // Create config for trajectory
     TrajectoryConfig config = new TrajectoryConfig(
