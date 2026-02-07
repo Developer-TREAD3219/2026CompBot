@@ -40,13 +40,11 @@ public void startIntakeRollers(){
 
 public void stopIntakeRollers(){
   //Stops the Intake rollers
-  System.out.println("[INTAKE] Rollers stopped");
   m_intakeMotor.set(0);
 }
 
 public void reverseIntakeRollers(){
   //Reverses the Intake rollers to get stuff unstuck
-  System.out.println("[INTAKE] Rollers reversed");
   m_intakeMotor.set(-IntakeConstants.kIntakeReverseMotorSpeed);
   
 }
