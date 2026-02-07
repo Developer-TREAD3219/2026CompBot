@@ -325,65 +325,62 @@ public class RobotContainer {
     // */
     // return autoChooser.getSelected();
 
-    /*
-     * TO DO: Autonomouse to start launcher, move forward 2 feet, then run upper
-     * indexer, then run indexer, wait 4 seconds, then stop motors.
-     */
-    // Command m_autonomousCommand;
-    // m_autonomousCommand =
-    // // new PathPlannerAuto("Dead Ahead")
-    // // .andThen(() -> m_ElevatorSubsystem.goToElevatorL2(), m_ElevatorSubsystem)
-    // new InstantCommand(() -> m_launcherSubsystem.startLauncher(),
-    // m_launcherSubsystem)
-    // // .andthen(m_robotDrive.)
-    // .andThen(() -> m_UpperIndexerSubsystem.startUpperIndexerMotor(),
-    // m_UpperIndexerSubsystem)
-    // .andThen(() -> m_robotIndexer.startIndexerMotor(), m_robotIndexer)
-    // .andThen(Commands.waitSeconds(4))
-    // .andThen(() -> m_robotIndexer.stopIndexerMotor(), m_robotIndexer)
-    // .andThen(() -> m_UpperIndexerSubsystem.stopUpperIndexerMotor(),
-    // m_UpperIndexerSubsystem)
-    // .andThen(() -> m_launcherSubsystem.stopLauncher(), m_launcherSubsystem);
-    // return m_autonomousCommand;
+/*
+ * Autonomouse to start launcher, move forward 2 feet, then run upper indexer, then run indexer, wait 4 seconds, then stop motors.
+ */
+Command m_autonomousCommand;
+    m_autonomousCommand = 
+    // new PathPlannerAuto("Dead Ahead")
+      // .andThen(() -> m_ElevatorSubsystem.goToElevatorL2(), m_ElevatorSubsystem)
+      new InstantCommand(() -> m_launcherSubsystem.startLauncher(), m_launcherSubsystem)
+      // .andthen(m_robotDrive.)
+      .andThen(() -> m_UpperIndexerSubsystem.startUpperIndexerMotor(), m_UpperIndexerSubsystem)
+      .andThen(() -> m_robotIndexer.startIndexerMotor(), m_robotIndexer)
+      .andThen(Commands.waitSeconds(4))
+      .andThen(() -> m_robotIndexer.stopIndexerMotor(), m_robotIndexer)
+      .andThen(() -> m_UpperIndexerSubsystem.stopUpperIndexerMotor(), m_UpperIndexerSubsystem)
+      .andThen(() -> m_launcherSubsystem.stopLauncher(), m_launcherSubsystem);
+    return m_autonomousCommand;
 
-    // Create config for trajectory
-    TrajectoryConfig config = new TrajectoryConfig(
-        AutoConstants.kMaxSpeedMetersPerSecond,
-        AutoConstants.kMaxAccelerationMetersPerSecondSquared)
-        // Add kinematics to ensure max speed is actually obeyed
-        .setKinematics(DriveConstants.kDriveKinematics);
+    // this is code from 2025.  is it needed/useful?
+  //   // Create config for trajectory
+  //   TrajectoryConfig config = new TrajectoryConfig(
+  //       AutoConstants.kMaxSpeedMetersPerSecond,
+  //       AutoConstants.kMaxAccelerationMetersPerSecondSquared)
+  //       // Add kinematics to ensure max speed is actually obeyed
+  //       .setKinematics(DriveConstants.kDriveKinematics);
 
-    // An example trajectory to follow. All units in meters.
-    Trajectory exampleTrajectory = TrajectoryGenerator.generateTrajectory(
-        // Start at the origin facing the +X direction
-        new Pose2d(0, 0, new Rotation2d(0)),
-        // Pass through these two interior waypoints, making an 's' curve path
-        List.of(new Translation2d(1, 1), new Translation2d(2, -1)),
-        // End 3 meters straight ahead of where we started, facing forward
-        new Pose2d(3, 0, new Rotation2d(0)),
-        config);
+  //   // An example trajectory to follow. All units in meters.
+  //   Trajectory exampleTrajectory = TrajectoryGenerator.generateTrajectory(
+  //       // Start at the origin facing the +X direction
+  //       new Pose2d(0, 0, new Rotation2d(0)),
+  //       // Pass through these two interior waypoints, making an 's' curve path
+  //       List.of(new Translation2d(1, 1), new Translation2d(2, -1)),
+  //       // End 3 meters straight ahead of where we started, facing forward
+  //       new Pose2d(3, 0, new Rotation2d(0)),
+  //       config);
 
-    var thetaController = new ProfiledPIDController(
-        AutoConstants.kPThetaController, 0, 0, AutoConstants.kThetaControllerConstraints);
-    thetaController.enableContinuousInput(-Math.PI, Math.PI);
+  //   var thetaController = new ProfiledPIDController(
+  //       AutoConstants.kPThetaController, 0, 0, AutoConstants.kThetaControllerConstraints);
+  //   thetaController.enableContinuousInput(-Math.PI, Math.PI);
 
-    SwerveControllerCommand swerveControllerCommand = new SwerveControllerCommand(
-        exampleTrajectory,
-        m_robotDrive::getPose, // Functional interface to feed supplier
-        DriveConstants.kDriveKinematics,
+  //   SwerveControllerCommand swerveControllerCommand = new SwerveControllerCommand(
+  //       exampleTrajectory,
+  //       m_robotDrive::getPose, // Functional interface to feed supplier
+  //       DriveConstants.kDriveKinematics,
 
-        // Position controllers
-        new PIDController(AutoConstants.kPXController, 0, 0),
-        new PIDController(AutoConstants.kPYController, 0, 0),
-        thetaController,
-        m_robotDrive::setModuleStates,
-        m_robotDrive);
+  //       // Position controllers
+  //       new PIDController(AutoConstants.kPXController, 0, 0),
+  //       new PIDController(AutoConstants.kPYController, 0, 0),
+  //       thetaController,
+  //       m_robotDrive::setModuleStates,
+  //       m_robotDrive);
 
-    // Reset odometry to the starting pose of the trajectory.
-    m_robotDrive.resetOdometry(exampleTrajectory.getInitialPose());
+  //   // Reset odometry to the starting pose of the trajectory.
+  //   m_robotDrive.resetOdometry(exampleTrajectory.getInitialPose());
 
-    // Run path following command, then stop at the end.
-    return swerveControllerCommand.andThen(() -> m_robotDrive.drive(0, 0, 0, false));
+  //   // Run path following command, then stop at the end.
+  //   return swerveControllerCommand.andThen(() -> m_robotDrive.drive(0, 0, 0, false));
   }
 
 }
