@@ -149,8 +149,9 @@ public class RobotContainer {
               m_robotDrive));
     }
 
-    new JoystickButton(m_gunnerController, XboxController.Button.kY.value)
-        .whileTrue(new RunCommand(() -> m_robotTurret.lockOntoHub(), m_robotTurret));
+    // // TO DO: determine if we need to do this
+    // new JoystickButton(m_gunnerController, XboxController.Button.kY.value)
+    //     .whileTrue(new RunCommand(() -> m_robotTurret.lockOntoHub(), m_robotTurret));
 
     Trigger launchTrigger = new Trigger(this::launchRequested);
     // Launcher (toggle) & indexer (on a delay)

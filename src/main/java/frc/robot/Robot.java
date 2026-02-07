@@ -97,12 +97,10 @@ public class Robot extends TimedRobot {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.schedule();
     }
-    
+
     if (!Constants.kTestMode) {
       // Calls function to get alliance color tags
       AllianceHelpers.setAllianceColor();
-      m_autonomousCommand = m_robotContainer.getAutonomousCommand();
-
       // schedule the autonomous command (example)
       if (m_autonomousCommand != null) {
         CommandScheduler.getInstance().schedule(m_autonomousCommand);

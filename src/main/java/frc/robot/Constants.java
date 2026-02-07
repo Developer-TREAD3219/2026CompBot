@@ -148,7 +148,7 @@ public final class Constants {
 
   public static final class UpperIndexerConstants {
     public static final int kUpperIndexerCanId = 27;
-    public static final double kUpperIndexerMotorSpeed = 0.5;
+    public static final double kUpperIndexerMotorSpeed = 0.2;
     public static final double kUpperIndexerReverseMotorSpeed = 0.1;
   }
 
@@ -169,6 +169,16 @@ public final class Constants {
     public static final int kDPadRight = 90;
     public static final int kDPadDown = 180;
     public static final int kDPadLeft = 270;
+  }
+
+  public static final class TurretConstants {
+    public static final int kTurretCanId = 30;
+    public static final double kP = 1;
+    public static final double kI = 0;
+    public static final double kD = 0;
+    public static final double kTargetToleranceDegrees = 5;
+    public static final double kLowClamp = -0.5;
+    public static final double kHighClamp = 0.5;
   }
 
   public static class States {
