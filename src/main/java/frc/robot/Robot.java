@@ -43,7 +43,8 @@ public class Robot extends TimedRobot {
 
   public void robotInit() {
     // Start camera
-    CameraServer.startAutomaticCapture();
+    CameraServer.startAutomaticCapture(0);
+    CameraServer.startAutomaticCapture(1);
   }
 
   /**
