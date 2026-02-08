@@ -213,4 +213,15 @@ public final class Constants {
       return m_currentState;
     }
   }
+
+  public enum Zones {
+    RED_TRENCH,
+    BLUE_TRENCH,
+    RED_HUB,
+    BLUE_HUB,
+    RED_TOWER,
+    BLUE_TOWER,
+    RED_OUTPOST,
+    BLUE_OUTPOST
+  }
 }

@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.UpperIndexerConstants;;
 
 public class UpperIndexerSubsystem extends SubsystemBase {
+  // TODO: Change to FLEX
   private SparkMax m_UpperindexerMotor;
 
   /** UpperIndexerSubsystem. */

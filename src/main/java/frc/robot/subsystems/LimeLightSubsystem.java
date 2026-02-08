@@ -4,6 +4,9 @@ import frc.robot.utils.LimelightHelpers;
 import frc.robot.utils.LimelightHelpers.LimelightTarget_Fiducial;
 import frc.robot.subsystems.DriveSubsystem;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 import com.ctre.phoenix6.hardware.Pigeon2;
 
@@ -12,6 +15,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.wpilibj.Timer;
 import frc.robot.Constants.VisionConstants;
+import frc.robot.Constants.Zones;
 
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -29,17 +33,30 @@ public class LimeLightSubsystem extends SubsystemBase {
     // Unsure if we want to use the line on top or leave it like this
 
     // List of Hub Tags with their respective sides
-    private final int[] RedHubTags = { 2, 3, 4, 5, 8, 9, 10, 11, };
-    private final int[] BlueHubTags = { 18, 19, 20, 21, 24, 25, 26, 27 };
-    private final int[] RedTowerTags = { 15, 16 };
-    private final int[] BlueTowerTags = { 31, 32 };
-    private final int[] RedOutpostTags = { 13, 14 };
-    private final int[] BlueOutpostTags = { 29, 30 };
-    private final int[] RedTrenchTags = { 1, 6, 7, 12 };
-    private final int[] BlueTrenchTags = { 17, 22, 23, 28 };
+    private final Set<Integer> RedHubTags = Set.of(2, 3, 4, 5, 8, 9, 10, 11);
+    private final Set<Integer> BlueHubTags = Set.of(18, 19, 20, 21, 24, 25, 26, 27);
+    private final Set<Integer> RedTowerTags = Set.of(15, 16);
+    private final Set<Integer> BlueTowerTags = Set.of(31, 32);
+    private final Set<Integer> RedOutpostTags = Set.of(13, 14);
+    private final Set<Integer> BlueOutpostTags = Set.of(29, 30);
+    private final Set<Integer> RedTrenchTags = Set.of(1, 6, 7, 12);
+    private final Set<Integer> BlueTrenchTags = Set.of(17, 22, 23, 28);
 
-    private int[] activeHubTags;
-    private int[] activetrenchTags;
+    private final Map<Zones, Set<Integer>> m_zoneMap = Map.of(
+            Zones.RED_HUB, RedHubTags,
+            Zones.BLUE_HUB, BlueHubTags,
+            Zones.RED_TOWER, RedTowerTags,
+            Zones.BLUE_TOWER, BlueTowerTags,
+            Zones.RED_OUTPOST, RedOutpostTags,
+            Zones.BLUE_OUTPOST, BlueOutpostTags,
+            Zones.RED_TRENCH, RedTrenchTags,
+            Zones.BLUE_TRENCH, BlueTrenchTags);
+
+    private Map<Zones, Boolean> m_visibleZones = new java.util.HashMap<>();
+
+    private Set<Integer> activeHubTags;
+    private Set<Integer> activetrenchTags;
+    private Set<Integer> m_allActiveTags = new HashSet<>();
     private String activeAllianceColorHex;
 
     // Target lock buffer duration: how long we're ok with keeping an old result
@@ -52,8 +69,15 @@ public class LimeLightSubsystem extends SubsystemBase {
     // private final double maxLockOnDistance = 0.5;
     // 0.5 meters = 1.64042 feet
 
+    private void initZones() {
+        for (Zones zone : Zones.values()) {
+            m_visibleZones.put(zone, false);
+        }
+    }
+
     public LimeLightSubsystem(DriveSubsystem driveSubsystem) {
         // Initialize Limelight settings if needed
+        initZones();
         this.m_poseEstimator = null;
         this.m_gyro = null;
         if (driveSubsystem != null) {
@@ -85,23 +109,42 @@ public class LimeLightSubsystem extends SubsystemBase {
         LimelightHelpers.setPipelineIndex(limelightCam, 0);
     }
 
+    private void printVisibleZones() {
+        for (Map.Entry<Zones, Boolean> entry : m_visibleZones.entrySet()) {
+            Zones zone = entry.getKey();
+            Boolean isVisible = entry.getValue();
+            if (isVisible) {
+                System.out.println(zone + " is visible");
+            }
+        }
+    }
+
+    private void updateVisibleZones(Set<Integer> detectedTags) {
+        for (Map.Entry<Zones, Set<Integer>> entry : m_zoneMap.entrySet()) {
+            Zones zone = entry.getKey();
+            Set<Integer> tags = entry.getValue();
+            if (detectedTags.containsAll(tags)) {
+                m_visibleZones.put(zone, true);
+            } else {
+                m_visibleZones.put(zone, false);
+            }
+        }
+    }
+
     public void update() {
         double currentTime = Timer.getFPGATimestamp();
         result = LimelightHelpers.getLatestResults(limelightCam);
-        // Look for the last result that has a valid target
-        if (result != null && result.targets_Fiducials.length > 0) {
-            int index = -1;
-            for (LimelightHelpers.LimelightTarget_Fiducial target : result.targets_Fiducials) {
-                if (Arrays.stream(activeHubTags).anyMatch(id -> id == target.fiducialID)) {
-                    currentLock = target;
-                    lastUpdateTime = currentTime;
-                    index += 1;
-                    System.out.println("index = 0" + index + ", id = "+ target.fiducialID);
-                    break;
-                }
-            }
-            System.out.println("target found");
+        HashSet<Integer> validTagIDs = new HashSet<>();
+        for (LimelightHelpers.LimelightTarget_Fiducial target : result.targets_Fiducials) {
+            validTagIDs.add((int) target.fiducialID);
         }
+        m_allActiveTags = validTagIDs;
+        updateVisibleZones(validTagIDs);
+        // Look for the last result that has a valid target
+        // number of tags
+        System.out.println("Detected tags: " + m_allActiveTags);
+        updateVisibleZones(m_allActiveTags);
+        printVisibleZones();
         if (result.targets_Fiducials.length == 0)
             return;
         System.out.println(" result = " + result.targets_Fiducials.length);
@@ -145,20 +188,21 @@ public class LimeLightSubsystem extends SubsystemBase {
         }
     }
 
-    public void attemptHubLockon() {
-        System.out.println("fiducials length=" + result.targets_Fiducials.length);
-        if (result != null && result.targets_Fiducials.length > 0) {
-            for (LimelightHelpers.LimelightTarget_Fiducial target : result.targets_Fiducials) {
-                if (Arrays.stream(activeHubTags).anyMatch(id -> id == target.fiducialID)) {
-                    double distance = get2dDistance(target);
-                    if (distance < maxLockOnDistance && distance < currentLockDistance) {
-                        currentLock = target;
-                        currentLockDistance = distance;
-                    }
-                }
-            }
-        }
-    }
+    // public void attemptHubLockon() {
+    // System.out.println("fiducials length=" + result.targets_Fiducials.length);
+    // if (result != null && result.targets_Fiducials.length > 0) {
+    // for (LimelightHelpers.LimelightTarget_Fiducial target :
+    // result.targets_Fiducials) {
+    // if (Arrays.stream(activeHubTags).anyMatch(id -> id == target.fiducialID)) {
+    // double distance = get2dDistance(target);
+    // if (distance < maxLockOnDistance && distance < currentLockDistance) {
+    // currentLock = target;
+    // currentLockDistance = distance;
+    // }
+    // }
+    // }
+    // }
+    // }
 
     public int getApriltagID() {
         return currentLock != null ? (int) currentLock.fiducialID : -1;
@@ -187,7 +231,8 @@ public class LimeLightSubsystem extends SubsystemBase {
     @Override
     public void periodic() {
         // System.out.println(
-        //        "id=" + NetworkTableInstance.getDefault().getTable("limelight-tread").getEntry("tid").getInteger(0));
+        // "id=" +
+        // NetworkTableInstance.getDefault().getTable("limelight-tread").getEntry("tid").getInteger(0));
         update();
         if (currentLock != null) {
             // SmartDashboard.putNumber("Apriltag ID", getApriltagID());
