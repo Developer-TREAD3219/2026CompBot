@@ -822,7 +822,7 @@ public class LimelightHelpers {
 
     static final String sanitizeName(String name) {
         if ("".equals(name) || name == null) {
-            return "limelight";
+            return "limelight-tread";
         }
         return name;
     }
@@ -1115,7 +1115,7 @@ public class LimelightHelpers {
     }
 
     public static NetworkTable getLimelightNTTable(String tableName) {
-        return NetworkTableInstance.getDefault().getTable(sanitizeName(tableName));
+        return NetworkTableInstance.getDefault().getTable(tableName);
     }
 
     public static void Flush() {

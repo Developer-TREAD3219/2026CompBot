@@ -24,10 +24,10 @@ public class AllianceHelpers {
     Optional<Alliance> ally = DriverStation.getAlliance();
     if (ally.isPresent()) {
       if (ally.get() == Alliance.Red) {
-        System.out.println("Red Alliance");
+        // System.out.println("Red Alliance");
         allianceColorHexEntry.setString("#FF0000");
       } else if (ally.get() == Alliance.Blue) {
-        System.out.println("Blue Alliance");
+        // System.out.println("Blue Alliance");
         allianceColorHexEntry.setString("#0000FF");
       }
     } else {

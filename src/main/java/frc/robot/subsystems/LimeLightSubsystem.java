@@ -2,6 +2,7 @@ package frc.robot.subsystems;
 
 import frc.robot.utils.LimelightHelpers;
 import frc.robot.utils.LimelightHelpers.LimelightTarget_Fiducial;
+import frc.robot.utils.LimelightHelpers.RawFiducial;
 import frc.robot.subsystems.DriveSubsystem;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -78,6 +79,7 @@ public class LimeLightSubsystem extends SubsystemBase {
     public LimeLightSubsystem(DriveSubsystem driveSubsystem) {
         // Initialize Limelight settings if needed
         initZones();
+        detectAprilTags();
         this.m_poseEstimator = null;
         this.m_gyro = null;
         if (driveSubsystem != null) {
@@ -134,20 +136,19 @@ public class LimeLightSubsystem extends SubsystemBase {
     public void update() {
         double currentTime = Timer.getFPGATimestamp();
         result = LimelightHelpers.getLatestResults(limelightCam);
+        RawFiducial[] tags = LimelightHelpers.getRawFiducials(limelightCam);
         HashSet<Integer> validTagIDs = new HashSet<>();
-        for (LimelightHelpers.LimelightTarget_Fiducial target : result.targets_Fiducials) {
-            validTagIDs.add((int) target.fiducialID);
+        for (RawFiducial fiducial : tags) {
+            System.out.println((int) fiducial.id);
+            validTagIDs.add((int) fiducial.id);
         }
         m_allActiveTags = validTagIDs;
-        updateVisibleZones(validTagIDs);
-        // Look for the last result that has a valid target
-        // number of tags
-        System.out.println("Detected tags: " + m_allActiveTags);
         updateVisibleZones(m_allActiveTags);
         printVisibleZones();
-        if (result.targets_Fiducials.length == 0)
+        // System.out.println(" result = " + result.targets_Fiducials.length);
+        if (tags.length == 0)
             return;
-        System.out.println(" result = " + result.targets_Fiducials.length);
+
         System.out.println(" Yaw=" + getYaw());
         System.out.println(" Skew=" + getSkew());
         System.out.println(" Pitch=" + getPitch());
@@ -246,17 +247,14 @@ public class LimeLightSubsystem extends SubsystemBase {
 
         // tv int 1 if valid target exists. 0 if no valid targets exist
         // tx double Horizontal Offset From Crosshair To Target (LL1: -27 degrees to 27
-        // degrees / LL2: -29.8 to 29.8 degrees)
-        // ty double Vertical Offset From Crosshair To Target (LL1: -20.5 degrees to
-        // 20.5 degrees / LL2: -24.85 to 24.85 degrees)
-        // double tv =
-        NetworkTableInstance.getDefault().getTable("limelightCam").getEntry("tv").getDouble(0);
+        // degrees / LL2: -29.8 to 29.8 degrees)klm
+        NetworkTableInstance.getDefault().getTable(VisionConstants.kCameraName).getEntry("tv").getDouble(0);
         // double tx =
-        // NetworkTableInstance.getDefault().getTable("limelightCam").getEntry("tx").getDouble(0);
+        // NetworkTableInstance.getDefault().getTable(VisionConstants.kCameraName).getEntry("tx").getDouble(0);
         // double ty =
-        // NetworkTableInstance.getDefault().getTable("limelightCam").getEntry("ty").getDouble(0);
+        // NetworkTableInstance.getDefault().getTable(VisionConstants.kCameraName).getEntry("ty").getDouble(0);
         // double ta =
-        // NetworkTableInstance.getDefault().getTable("limelightCam").getEntry("ta").getDouble(0);
+        // NetworkTableInstance.getDefault().getTable(VisionConstants.kCameraName).getEntry("ta").getDouble(0);
 
     }
 
