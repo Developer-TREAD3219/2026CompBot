@@ -6,6 +6,8 @@ package frc.robot;
 
 import java.util.Optional;
 
+import org.opencv.objdetect.CascadeClassifier;
+
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -27,6 +29,7 @@ public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
 
   private final RobotContainer m_robotContainer;
+  private Boolean isInactiveFirst = null;
 
   /**
    * This function is run when the robot is first started up and should be used
@@ -84,7 +87,7 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void autonomousInit() {
-    //m_autonomousCommand = m_robotContainer.getAutonomousCommand();
+    // m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
     /*
      * String autoSelected = SmartDashboard.getString("Auto Selector",
@@ -124,12 +127,15 @@ public class Robot extends TimedRobot {
     }
     // Calls function to get alliance color tags
     AllianceHelpers.setAllianceColor();
+    isInactiveFirst = null;
   }
 
   /** This function is called periodically during operator control. */
   @Override
   public void teleopPeriodic() {
-  }
+    // Update hub status for our alliance.  It will be stored in the Network Tables and displayed on the dashboard.
+    AllianceHelpers.updateHubStatus(isInactiveFirst);
+    }
 
   @Override
   public void testInit() {
