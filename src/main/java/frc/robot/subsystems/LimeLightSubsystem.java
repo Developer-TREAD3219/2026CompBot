@@ -164,9 +164,6 @@ public class LimeLightSubsystem extends SubsystemBase {
             }
             System.out.println("target found");
         }
-        System.out.println(" Yaw=" + getYaw());
-        System.out.println(" Skew=" + getSkew());
-        System.out.println(" Pitch=" + getPitch());
     }
 
     // called from Drive subsystem
@@ -241,9 +238,6 @@ public class LimeLightSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-        // System.out.println(
-        // "id=" +
-        // NetworkTableInstance.getDefault().getTable(m_limelightCam).getEntry("tid").getInteger(0));
         update();
         if (m_currentLock != null) {
             // SmartDashboard.putNumber("Apriltag ID", getApriltagID());
