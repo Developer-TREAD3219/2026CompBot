@@ -6,6 +6,7 @@ import frc.robot.utils.LimelightHelpers.RawFiducial;
 import frc.robot.subsystems.DriveSubsystem;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
 
@@ -26,10 +27,10 @@ public class LimeLightSubsystem extends SubsystemBase {
     private SwerveDrivePoseEstimator m_poseEstimator;
     private Pigeon2 m_gyro; // Add this line to declare m_gyro
     // Limelight for reading AprilTags
-    private final String limelightCam = VisionConstants.kCameraName;
-    private LimelightHelpers.LimelightResults result;
-    private LimelightHelpers.LimelightTarget_Fiducial currentLock;
-    private double currentLockDistance = Double.MAX_VALUE;
+    private final String m_limelightCam = VisionConstants.kCameraName;
+    private LimelightHelpers.LimelightResults m_result;
+    private LimelightHelpers.LimelightTarget_Fiducial m_currentLock;
+    private double m_currentLockDistance = Double.MAX_VALUE;
 
     // Unsure if we want to use the line on top or leave it like this
 
@@ -55,9 +56,10 @@ public class LimeLightSubsystem extends SubsystemBase {
 
     private Map<Zones, Boolean> m_visibleZones = new java.util.HashMap<>();
 
-    private Set<Integer> activeHubTags;
-    private Set<Integer> activetrenchTags;
-    private Set<Integer> m_allActiveTags = new HashSet<>();
+    private Set<Integer> m_activeHubTags;
+    private Set<Integer> m_activetrenchTags;
+    private ArrayList<Integer> m_allActiveTags = new ArrayList<>();
+    private Set<Integer> m_allValidTagIds = new HashSet<>();
     private String activeAllianceColorHex;
 
     // Target lock buffer duration: how long we're ok with keeping an old result
@@ -70,15 +72,16 @@ public class LimeLightSubsystem extends SubsystemBase {
     // private final double maxLockOnDistance = 0.5;
     // 0.5 meters = 1.64042 feet
 
-    private void initZones() {
+    private void initTagsAndZones() {
         for (Zones zone : Zones.values()) {
             m_visibleZones.put(zone, false);
+            m_allValidTagIds.addAll(m_zoneMap.get(zone));
         }
     }
 
     public LimeLightSubsystem(DriveSubsystem driveSubsystem) {
         // Initialize Limelight settings if needed
-        initZones();
+        initTagsAndZones();
         detectAprilTags();
         this.m_poseEstimator = null;
         this.m_gyro = null;
@@ -90,25 +93,25 @@ public class LimeLightSubsystem extends SubsystemBase {
         // Determine alliance color and set HubTags and TrenchTags accordingly
         activeAllianceColorHex = AllianceHelpers.getAllianceColor();
         if (activeAllianceColorHex.equals("#FF0000")) { // Red Alliance
-            activeHubTags = RedHubTags;
-            activetrenchTags = RedTrenchTags;
+            m_activeHubTags = RedHubTags;
+            m_activetrenchTags = RedTrenchTags;
         } else if (activeAllianceColorHex.equals("#0000FF")) { // Blue Alliance
-            activeHubTags = BlueHubTags;
-            activetrenchTags = BlueTrenchTags;
+            m_activeHubTags = BlueHubTags;
+            m_activetrenchTags = BlueTrenchTags;
         } else {
-            activeHubTags = null;
-            activetrenchTags = null;
+            m_activeHubTags = null;
+            m_activetrenchTags = null;
         }
     }
 
     public void driverMode() {
-        LimelightHelpers.setLEDMode_ForceOff(limelightCam);
-        LimelightHelpers.setStreamMode_Standard(limelightCam);
+        LimelightHelpers.setLEDMode_ForceOff(m_limelightCam);
+        LimelightHelpers.setStreamMode_Standard(m_limelightCam);
     }
 
     public void detectAprilTags() {
-        LimelightHelpers.setLEDMode_ForceOn(limelightCam);
-        LimelightHelpers.setPipelineIndex(limelightCam, 0);
+        LimelightHelpers.setLEDMode_ForceOn(m_limelightCam);
+        LimelightHelpers.setPipelineIndex(m_limelightCam, 0);
     }
 
     private void printVisibleZones() {
@@ -135,37 +138,44 @@ public class LimeLightSubsystem extends SubsystemBase {
 
     public void update() {
         double currentTime = Timer.getFPGATimestamp();
-        result = LimelightHelpers.getLatestResults(limelightCam);
-        RawFiducial[] tags = LimelightHelpers.getRawFiducials(limelightCam);
-        HashSet<Integer> validTagIDs = new HashSet<>();
+        m_result = LimelightHelpers.getLatestResults(m_limelightCam);
+        RawFiducial[] tags = LimelightHelpers.getRawFiducials(m_limelightCam);
+        m_allActiveTags.clear();
         for (RawFiducial fiducial : tags) {
-            System.out.println((int) fiducial.id);
-            validTagIDs.add((int) fiducial.id);
+            m_allActiveTags.add((int) fiducial.id);
         }
-        m_allActiveTags = validTagIDs;
-        updateVisibleZones(m_allActiveTags);
-        printVisibleZones();
-        // System.out.println(" result = " + result.targets_Fiducials.length);
-        if (tags.length == 0)
-            return;
-
+        updateVisibleZones(new HashSet<Integer>(m_allActiveTags));
+        // printVisibleZones();
+        // Clear our lock on if it's been too long
+        if (m_currentLock != null && (currentTime - lastUpdateTime > bufferTime)) {
+            m_currentLock = null;
+            m_currentLockDistance = Double.MAX_VALUE;
+        }
+        System.out.println("active tags = " + m_allActiveTags);
+        // Look for the last result that has a valid target
+        if (m_result != null && m_result.targets_Fiducials.length > 0) {
+            int nearestTag = m_allActiveTags.get(0);
+            for (LimelightHelpers.LimelightTarget_Fiducial target : m_result.targets_Fiducials) {
+                if (m_allValidTagIds.contains((int) target.fiducialID) && (int) target.fiducialID == nearestTag) {
+                    m_currentLock = target;
+                    lastUpdateTime = currentTime;
+                    break;
+                }
+            }
+            System.out.println("target found");
+        }
         System.out.println(" Yaw=" + getYaw());
         System.out.println(" Skew=" + getSkew());
         System.out.println(" Pitch=" + getPitch());
-
-        // Clear our lock on if it's been too long
-        if (currentLock != null && (currentTime - lastUpdateTime > bufferTime)) {
-            currentLock = null;
-            currentLockDistance = Double.MAX_VALUE;
-        }
     }
 
     // called from Drive subsystem
     //
     public void updateRobotOrientation() {
-        LimelightHelpers.SetRobotOrientation("limelight",
-                m_poseEstimator.getEstimatedPosition().getRotation().getDegrees(), 0, 0, 0, 0, 0);
-        LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight");
+
+        // m_poseEstimator.getEstimatedPosition().getRotation().getDegrees(), 0, 0, 0,
+        // 0, 0);
+        LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(m_limelightCam);
         boolean doRejectUpdate = false;
 
         // if(Math.abs(m_gyro.getRate()) > 720) // if our angular velocity is greater
@@ -206,19 +216,19 @@ public class LimeLightSubsystem extends SubsystemBase {
     // }
 
     public int getApriltagID() {
-        return currentLock != null ? (int) currentLock.fiducialID : -1;
+        return m_currentLock != null ? (int) m_currentLock.fiducialID : -1;
     }
 
     public double getSkew() {
-        return currentLock != null ? currentLock.ts : 0.0;
+        return m_currentLock != null ? m_currentLock.ts : 0.0;
     }
 
     public double getYaw() {
-        return currentLock != null ? currentLock.tx : 0.0;
+        return m_currentLock != null ? m_currentLock.tx : 0.0;
     }
 
     public double getPitch() {
-        return currentLock != null ? currentLock.ty : 0.0;
+        return m_currentLock != null ? m_currentLock.ty : 0.0;
     }
 
     // public boolean isAmbiguousPose() {
@@ -233,9 +243,9 @@ public class LimeLightSubsystem extends SubsystemBase {
     public void periodic() {
         // System.out.println(
         // "id=" +
-        // NetworkTableInstance.getDefault().getTable("limelight-tread").getEntry("tid").getInteger(0));
+        // NetworkTableInstance.getDefault().getTable(m_limelightCam).getEntry("tid").getInteger(0));
         update();
-        if (currentLock != null) {
+        if (m_currentLock != null) {
             // SmartDashboard.putNumber("Apriltag ID", getApriltagID());
             // SmartDashboard.putNumber("Skew", getSkew());
             // SmartDashboard.putNumber("Yaw", getYaw());
@@ -258,5 +268,5 @@ public class LimeLightSubsystem extends SubsystemBase {
 
     }
 
-    // NetworkTableInstance.getDefault().getTable("limeLightCam").getEntry("<variablename>").getDouble(0);
+    // NetworkTableInstance.getDefault().getTable("m_limelightCam").getEntry("<variablename>").getDouble(0);
 }
