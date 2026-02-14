@@ -21,6 +21,7 @@ import frc.robot.Constants.Zones;
 
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.NetworkTableValue;
 import frc.robot.utils.AllianceHelpers;
 
 public class LimeLightSubsystem extends SubsystemBase {
@@ -151,7 +152,9 @@ public class LimeLightSubsystem extends SubsystemBase {
             m_currentLock = null;
             m_currentLockDistance = Double.MAX_VALUE;
         }
-        System.out.println("active tags = " + m_allActiveTags);
+        if (m_allActiveTags.size() > 0) {
+            System.out.println("active tags = " + m_allActiveTags);
+        }
         // Look for the last result that has a valid target
         if (m_result != null && m_result.targets_Fiducials.length > 0) {
             int nearestTag = m_allActiveTags.get(0);
@@ -162,7 +165,7 @@ public class LimeLightSubsystem extends SubsystemBase {
                     break;
                 }
             }
-            System.out.println("target found");
+            // System.out.println("target found");
         }
     }
 
@@ -228,6 +231,46 @@ public class LimeLightSubsystem extends SubsystemBase {
         return m_currentLock != null ? m_currentLock.ty : 0.0;
     }
 
+    public double getHubPosition() {
+        // Define the constant value
+        final double CONSTANT = 23.5;
+        double distApril = get2dDistance(m_currentLock);
+        double thetaApril = 30.0;
+        // --- Numerator Calculation ---
+        // Numerator: 23.5 * (θ_april + 90°)
+        double numerator = CONSTANT * (thetaApril + 90.0);
+
+        // --- Denominator Calculation ---
+        // First, convert the angle to radians for the cosine function
+        double angleInRadians = Math.toRadians(thetaApril + 90.0);
+
+        // Calculate the terms inside the square root
+        // Term 1: 23.5²
+        double term1 = CONSTANT * CONSTANT;
+        // Term 2: D_april
+        double term2 = distApril;
+        // Term 3: 2 * 23.5 * D_april * cos(θ_april + 90°)
+        double term3 = Math.abs(2.0 * CONSTANT * distApril * Math.cos(angleInRadians));
+
+        // Denominator: √(term1 + term2 + term3)
+        // System.out.println("Term 1 (23.5²): " + term1);
+        // System.out.println("Term 2 (D_april): " + term2);
+        // System.out.println("Term 3 (2 * 23.5 * D_april * cos(θ_april + 90°)): " +
+        // term3);
+        double denominator = Math.sqrt(term1 + term2 + term3);
+
+        // --- Final Calculation ---
+        // It's good practice to check for division by zero, though unlikely with this
+        // formula.
+        double result;
+        if (denominator == 0) {
+            result = 0.0;
+        } else {
+            result = numerator / denominator;
+        }
+        return result;
+    }
+
     // public boolean isAmbiguousPose() {
     // return currentLock != null && currentLock.ambiguity > 0.1;
     // }
@@ -240,19 +283,27 @@ public class LimeLightSubsystem extends SubsystemBase {
     public void periodic() {
         update();
         if (m_currentLock != null) {
-            // SmartDashboard.putNumber("Apriltag ID", getApriltagID());
-            // SmartDashboard.putNumber("Skew", getSkew());
-            // SmartDashboard.putNumber("Yaw", getYaw());
-            // SmartDashboard.putNumber("Pitch", getPitch());
-            // // SmartDashboard.putBoolean("Ambiguous Pose", isAmbiguousPose());
-            // SmartDashboard.putNumber("Distance", get2dDistance(currentLock));
+            NetworkTableInstance.getDefault().getTable(VisionConstants.kCameraName).putValue("ApriltagID",
+                    NetworkTableValue.makeInteger(getApriltagID()));
+            NetworkTableInstance.getDefault().getTable(VisionConstants.kCameraName).putValue("Skew",
+                    NetworkTableValue.makeDouble(getSkew()));
+            NetworkTableInstance.getDefault().getTable(VisionConstants.kCameraName).putValue("Yaw",
+                    NetworkTableValue.makeDouble(getYaw()));
+            NetworkTableInstance.getDefault().getTable(VisionConstants.kCameraName).putValue("Pitch",
+                    NetworkTableValue.makeDouble(getPitch()));
+            // // NetworkTableInstance.putBoolean("Ambiguous Pose", isAmbiguousPose());
+            NetworkTableInstance.getDefault().getTable(VisionConstants.kCameraName).putValue("Distance",
+                    NetworkTableValue.makeDouble(get2dDistance(m_currentLock)));
+            NetworkTableInstance.getDefault().getTable(VisionConstants.kCameraName).putValue("HubPosition",
+                    NetworkTableValue.makeDouble(getHubPosition()));
         }
         // This method will be called once per scheduler run
 
         // tv int 1 if valid target exists. 0 if no valid targets exist
         // tx double Horizontal Offset From Crosshair To Target (LL1: -27 degrees to 27
         // degrees / LL2: -29.8 to 29.8 degrees)klm
-        NetworkTableInstance.getDefault().getTable(VisionConstants.kCameraName).getEntry("tv").getDouble(0);
+        // double tv =
+        // NetworkTableInstance.getDefault().getTable(VisionConstants.kCameraName).getEntry("tv").getDouble(0);
         // double tx =
         // NetworkTableInstance.getDefault().getTable(VisionConstants.kCameraName).getEntry("tx").getDouble(0);
         // double ty =
