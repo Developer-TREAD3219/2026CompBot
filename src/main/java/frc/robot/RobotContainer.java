@@ -92,19 +92,21 @@ public class RobotContainer {
       m_robotIntake = new IntakeSubsystem();
       m_robotTurret = new TurretSubsystem();
       m_robotClimber = new ClimberSubsystem();
-    } else {
-      m_robotClimber = new ClimberSubsystem();
       m_launcherSubsystem = new LauncherSubsystem(m_gunnerController, m_botState);
-      m_robotDrive = null;
-      m_robotIntake = new IntakeSubsystem();
       m_robotIndexer = new IndexerSubsystem();
       m_UpperIndexerSubsystem = new UpperIndexerSubsystem();
-      m_robotTurret = new TurretSubsystem();
+      m_Limelight = new LimeLightSubsystem(m_robotDrive);
+      configureButtonBindings();
+    } else {
+      m_robotDrive = null;
+      m_robotIntake = null;
+      m_robotTurret = null;
+      m_robotClimber = null;
+      m_launcherSubsystem = null;
+      m_robotIndexer = null;
+      m_UpperIndexerSubsystem = null;
       m_Limelight = new LimeLightSubsystem(m_robotDrive);
     }
-
-    // Configure the button bindings
-    configureButtonBindings();
 
     // Configure default commands
     if (m_robotDrive != null) {
@@ -148,7 +150,7 @@ public class RobotContainer {
 
     // // TO DO: determine if we need to do this
     // new JoystickButton(m_gunnerController, XboxController.Button.kY.value)
-    //     .whileTrue(new RunCommand(() -> m_robotTurret.lockOntoHub(), m_robotTurret));
+    // .whileTrue(new RunCommand(() -> m_robotTurret.lockOntoHub(), m_robotTurret));
 
     Trigger launchTrigger = new Trigger(this::launchRequested);
     // Launcher (toggle) & indexer (on a delay)
@@ -177,15 +179,18 @@ public class RobotContainer {
         () -> m_robotIndexer.stopIndexerMotor(), m_robotIndexer));
 
     // Extend Climber
-    // TO DO: add a function isFullyExtended to check if fully extended, 
-    //              don't bother turning timeoout into a constant, since we will change it when we add the isFullyExtended function
+    // TO DO: add a function isFullyExtended to check if fully extended,
+    // don't bother turning timeoout into a constant, since we will change it when
+    // we add the isFullyExtended function
     Trigger extendClimberTrigger = new Trigger(this::extendClimberRequested);
     extendClimberTrigger.onTrue(
-        new RunCommand(() -> m_robotClimber.extendClimber(Constants.ClimberConstants.kClimberMotorSpeed), m_robotClimber)
+        new RunCommand(() -> m_robotClimber.extendClimber(Constants.ClimberConstants.kClimberMotorSpeed),
+            m_robotClimber)
             .withTimeout(5)
             .andThen(() -> m_robotClimber.stopClimber()));
     // Retract Climber
-    // TO DO (later): Add fully reatracted function isFulylRetracted to check if fully retracted
+    // TO DO (later): Add fully reatracted function isFulylRetracted to check if
+    // fully retracted
     Trigger retractClimberTrigger = new Trigger(this::retractClimberRequested);
     retractClimberTrigger.whileTrue(
         new StartEndCommand(
@@ -286,6 +291,7 @@ public class RobotContainer {
   public boolean launchRequested() {
     return m_gunnerController.getRightTriggerAxis() > OIConstants.kRightTriggerThreshhold;
   }
+
   // Check if left trigger is pressed on the gunner controller
   // Called by intake Trigger in configureButtonBindings()
   public boolean intakeRequested() {
@@ -296,14 +302,17 @@ public class RobotContainer {
   public boolean extendClimberRequested() {
     return m_gunnerController.getPOV() == dPadConstants.kDPadUp;
   }
+
   // Check if DPad Down is pressed on the gunner controller
   public boolean retractClimberRequested() {
     return m_gunnerController.getPOV() == dPadConstants.kDPadDown;
   }
+
   // Check if DPad Left is pressed on the gunner controller
   public boolean reverseIndexerRequested() {
     return m_gunnerController.getPOV() == dPadConstants.kDPadLeft;
   }
+
   // Check if DPad Right is pressed on the gunner controller
   public boolean reverseLauncherRequested() {
     return m_gunnerController.getPOV() == dPadConstants.kDPadRight;
@@ -323,62 +332,66 @@ public class RobotContainer {
     // */
     // return autoChooser.getSelected();
 
-/*
- * Autonomouse to start launcher, move forward 2 feet, then run upper indexer, then run indexer, wait 4 seconds, then stop motors.
- */
-Command m_autonomousCommand;
-    m_autonomousCommand = 
-    // new PathPlannerAuto("Dead Ahead")
-      // .andThen(() -> m_ElevatorSubsystem.goToElevatorL2(), m_ElevatorSubsystem)
-      new InstantCommand(() -> m_launcherSubsystem.startLauncher(), m_launcherSubsystem)
-      // .andthen(m_robotDrive.)
-      .andThen(() -> m_UpperIndexerSubsystem.startUpperIndexerMotor(), m_UpperIndexerSubsystem)
-      .andThen(() -> m_robotIndexer.startIndexerMotor(), m_robotIndexer)
-      .andThen(Commands.waitSeconds(4))
-      .andThen(() -> m_robotIndexer.stopIndexerMotor(), m_robotIndexer)
-      .andThen(() -> m_UpperIndexerSubsystem.stopUpperIndexerMotor(), m_UpperIndexerSubsystem)
-      .andThen(() -> m_launcherSubsystem.stopLauncher(), m_launcherSubsystem);
+    /*
+     * Autonomouse to start launcher, move forward 2 feet, then run upper indexer,
+     * then run indexer, wait 4 seconds, then stop motors.
+     */
+    Command m_autonomousCommand;
+    m_autonomousCommand =
+        // new PathPlannerAuto("Dead Ahead")
+        // .andThen(() -> m_ElevatorSubsystem.goToElevatorL2(), m_ElevatorSubsystem)
+        new InstantCommand(() -> m_launcherSubsystem.startLauncher(), m_launcherSubsystem)
+            // .andthen(m_robotDrive.)
+            .andThen(() -> m_UpperIndexerSubsystem.startUpperIndexerMotor(), m_UpperIndexerSubsystem)
+            .andThen(() -> m_robotIndexer.startIndexerMotor(), m_robotIndexer)
+            .andThen(Commands.waitSeconds(4))
+            .andThen(() -> m_robotIndexer.stopIndexerMotor(), m_robotIndexer)
+            .andThen(() -> m_UpperIndexerSubsystem.stopUpperIndexerMotor(), m_UpperIndexerSubsystem)
+            .andThen(() -> m_launcherSubsystem.stopLauncher(), m_launcherSubsystem);
     return m_autonomousCommand;
 
-    // this is code from 2025.  is it needed/useful?
-  //   // Create config for trajectory
-  //   TrajectoryConfig config = new TrajectoryConfig(
-  //       AutoConstants.kMaxSpeedMetersPerSecond,
-  //       AutoConstants.kMaxAccelerationMetersPerSecondSquared)
-  //       // Add kinematics to ensure max speed is actually obeyed
-  //       .setKinematics(DriveConstants.kDriveKinematics);
+    // this is code from 2025. is it needed/useful?
+    // // Create config for trajectory
+    // TrajectoryConfig config = new TrajectoryConfig(
+    // AutoConstants.kMaxSpeedMetersPerSecond,
+    // AutoConstants.kMaxAccelerationMetersPerSecondSquared)
+    // // Add kinematics to ensure max speed is actually obeyed
+    // .setKinematics(DriveConstants.kDriveKinematics);
 
-  //   // An example trajectory to follow. All units in meters.
-  //   Trajectory exampleTrajectory = TrajectoryGenerator.generateTrajectory(
-  //       // Start at the origin facing the +X direction
-  //       new Pose2d(0, 0, new Rotation2d(0)),
-  //       // Pass through these two interior waypoints, making an 's' curve path
-  //       List.of(new Translation2d(1, 1), new Translation2d(2, -1)),
-  //       // End 3 meters straight ahead of where we started, facing forward
-  //       new Pose2d(3, 0, new Rotation2d(0)),
-  //       config);
+    // // An example trajectory to follow. All units in meters.
+    // Trajectory exampleTrajectory = TrajectoryGenerator.generateTrajectory(
+    // // Start at the origin facing the +X direction
+    // new Pose2d(0, 0, new Rotation2d(0)),
+    // // Pass through these two interior waypoints, making an 's' curve path
+    // List.of(new Translation2d(1, 1), new Translation2d(2, -1)),
+    // // End 3 meters straight ahead of where we started, facing forward
+    // new Pose2d(3, 0, new Rotation2d(0)),
+    // config);
 
-  //   var thetaController = new ProfiledPIDController(
-  //       AutoConstants.kPThetaController, 0, 0, AutoConstants.kThetaControllerConstraints);
-  //   thetaController.enableContinuousInput(-Math.PI, Math.PI);
+    // var thetaController = new ProfiledPIDController(
+    // AutoConstants.kPThetaController, 0, 0,
+    // AutoConstants.kThetaControllerConstraints);
+    // thetaController.enableContinuousInput(-Math.PI, Math.PI);
 
-  //   SwerveControllerCommand swerveControllerCommand = new SwerveControllerCommand(
-  //       exampleTrajectory,
-  //       m_robotDrive::getPose, // Functional interface to feed supplier
-  //       DriveConstants.kDriveKinematics,
+    // SwerveControllerCommand swerveControllerCommand = new
+    // SwerveControllerCommand(
+    // exampleTrajectory,
+    // m_robotDrive::getPose, // Functional interface to feed supplier
+    // DriveConstants.kDriveKinematics,
 
-  //       // Position controllers
-  //       new PIDController(AutoConstants.kPXController, 0, 0),
-  //       new PIDController(AutoConstants.kPYController, 0, 0),
-  //       thetaController,
-  //       m_robotDrive::setModuleStates,
-  //       m_robotDrive);
+    // // Position controllers
+    // new PIDController(AutoConstants.kPXController, 0, 0),
+    // new PIDController(AutoConstants.kPYController, 0, 0),
+    // thetaController,
+    // m_robotDrive::setModuleStates,
+    // m_robotDrive);
 
-  //   // Reset odometry to the starting pose of the trajectory.
-  //   m_robotDrive.resetOdometry(exampleTrajectory.getInitialPose());
+    // // Reset odometry to the starting pose of the trajectory.
+    // m_robotDrive.resetOdometry(exampleTrajectory.getInitialPose());
 
-  //   // Run path following command, then stop at the end.
-  //   return swerveControllerCommand.andThen(() -> m_robotDrive.drive(0, 0, 0, false));
+    // // Run path following command, then stop at the end.
+    // return swerveControllerCommand.andThen(() -> m_robotDrive.drive(0, 0, 0,
+    // false));
   }
 
 }

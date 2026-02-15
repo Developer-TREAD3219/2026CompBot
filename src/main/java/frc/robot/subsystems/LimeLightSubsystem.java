@@ -100,8 +100,8 @@ public class LimeLightSubsystem extends SubsystemBase {
             m_activeHubTags = BlueHubTags;
             m_activetrenchTags = BlueTrenchTags;
         } else {
-            m_activeHubTags = null;
-            m_activetrenchTags = null;
+            m_activeHubTags.clear();
+            m_activetrenchTags.clear();
         }
     }
 
@@ -199,21 +199,19 @@ public class LimeLightSubsystem extends SubsystemBase {
         }
     }
 
-    // public void attemptHubLockon() {
-    // System.out.println("fiducials length=" + result.targets_Fiducials.length);
-    // if (result != null && result.targets_Fiducials.length > 0) {
-    // for (LimelightHelpers.LimelightTarget_Fiducial target :
-    // result.targets_Fiducials) {
-    // if (Arrays.stream(activeHubTags).anyMatch(id -> id == target.fiducialID)) {
-    // double distance = get2dDistance(target);
-    // if (distance < maxLockOnDistance && distance < currentLockDistance) {
-    // currentLock = target;
-    // currentLockDistance = distance;
-    // }
-    // }
-    // }
-    // }
-    // }
+    public void attemptHubLockon() {
+        if (m_result != null && m_result.targets_Fiducials.length > 0) {
+            for (LimelightHelpers.LimelightTarget_Fiducial target : m_result.targets_Fiducials) {
+                if (m_activeHubTags.contains((int)target.fiducialID)) {
+                    double distance = get2dDistance(target);
+                    if (distance < maxLockOnDistance && distance < m_currentLockDistance) {
+                        m_currentLock = target;
+                        m_currentLockDistance = distance;
+                    }
+                }
+            }
+        }
+    }
 
     public int getApriltagID() {
         return m_currentLock != null ? (int) m_currentLock.fiducialID : -1;

@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.utils.AllianceHelpers;
 import edu.wpi.first.cameraserver.CameraServer;
+import frc.robot.Constants;
 
 /**
  * The methods in this class are called automatically corresponding to each
@@ -46,8 +47,10 @@ public class Robot extends TimedRobot {
 
   public void robotInit() {
     // Start camera
-    CameraServer.startAutomaticCapture(0);
-    CameraServer.startAutomaticCapture(1);
+    if (!Constants.kTestMode) {
+      CameraServer.startAutomaticCapture(0);
+      CameraServer.startAutomaticCapture(1);
+    }
   }
 
   /**
@@ -127,15 +130,16 @@ public class Robot extends TimedRobot {
     }
     // Calls function to get alliance color tags
     AllianceHelpers.setAllianceColor();
-    isInactiveFirst = null;
+    isInactiveFirst = false;
   }
 
   /** This function is called periodically during operator control. */
   @Override
   public void teleopPeriodic() {
-    // Update hub status for our alliance.  It will be stored in the Network Tables and displayed on the dashboard.
+    // Update hub status for our alliance. It will be stored in the Network Tables
+    // and displayed on the dashboard.
     AllianceHelpers.updateHubStatus(isInactiveFirst);
-    }
+  }
 
   @Override
   public void testInit() {
