@@ -5,7 +5,6 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj.RobotController;
-import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.controls.Follower;
@@ -24,10 +23,9 @@ public class LauncherSubsystem extends SubsystemBase {
   private final TalonFX m_krakenMotorMaster = new TalonFX(LauncherConstants.kLauncherMotorMaster); // Replace 10 with your motor's CAN ID
   private final TalonFX m_krakenMotorFollower = new  TalonFX (LauncherConstants.kLauncherMotorFollower);
 
-  public LauncherSubsystem(XboxController controller, States.State botState) {
+  public LauncherSubsystem(States.State botState) {
 
     States.State m_botState = botState;
-    XboxController m_controller = controller;
     m_krakenMotorFollower.setControl(new Follower(m_krakenMotorMaster.getDeviceID(), MotorAlignmentValue.Opposed));
 
     // we may not need to use the Config lines
