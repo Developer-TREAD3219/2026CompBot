@@ -66,72 +66,68 @@ public class AllianceHelpers {
     }
   }
 
-  public static void updateHubStatus(Boolean isInactiveFirst) {
-    // AUTO AUTO 20 Seconds 0:20 – 0:00
-    // TELEOP TRANSITION SHIFT 10 Seconds 2:20 – 2:10
-    // SHIFT 1 25 Seconds 2:10 – 1:45
-    // SHIFT 2 25 Seconds 1:45 – 1:20
-    // SHIFT 3 25 Seconds 1:20 – 0:55
-    // SHIFT 4 25 Seconds 0:55 – 0:30
-    // END GAME 30 Seconds 0:30 – 0:00
-
-    // Get current match time
+public static void updateHubStatus(Boolean isInactiveFirst) {
     double timeRemaining = DriverStation.getMatchTime();
     double timeToInactive = 0;
     double timeToActive = 0;
 
-    // Hub is initially set to active, since it will be active for the 10 second period after autonomous.
-    boolean isHubActive = true;
-    // Determine the current shift
+    boolean isHubActive = false;
     boolean isInShift1 = (timeRemaining > 105 && timeRemaining <= 130);
     boolean isInShift2 = (timeRemaining > 80 && timeRemaining <= 105);
     boolean isInShift3 = (timeRemaining > 55 && timeRemaining <= 80);
     boolean isInShift4 = (timeRemaining > 30 && timeRemaining <= 55);
 
-    // If we already have the alliance shift assignment, we don't need to look again.
-    // This information isn't available until 3 seconds after autonomous ends.
     if (isInactiveFirst == null) {
-      isInactiveFirst = isInactiveFirst();
+        isInactiveFirst = isInactiveFirst();
     }
 
-    if (isInactiveFirst) {
-      if (isInShift2) {
-        isHubActive = true;
-        timeToInactive = timeRemaining - 80;
-      }
-      else if (isInShift4) {
-        isHubActive = true;
-        timeToInactive = timeRemaining - 30;
-      }
-    } else if (!isInactiveFirst) {
-      if (isInShift1) {
-        isHubActive = true;
-        timeToInactive = timeRemaining - 105;
-      }
-      else if (isInShift3) {
-        isHubActive = true;
-        timeToInactive = timeRemaining - 55;
-      }
+    // Guard against null if alliance/game data still isn't available
+    if (isInactiveFirst == null) {
+        isHubActive = true; // default safe value while waiting for data
+
+    } else if (isInactiveFirst) {
+        // This alliance is inactive in shifts 1 & 3, active in shifts 2 & 4
+        isHubActive = isInShift2 || isInShift4;
+        if (isInShift2) {
+            timeToInactive = timeRemaining - 80;
+            timeToActive = 0;
+        } else if (isInShift4) {
+            timeToInactive = timeRemaining - 30;
+            timeToActive = 0;
+        } else if (isInShift1) {
+            timeToInactive = 0;
+            timeToActive = timeRemaining - 105; // time until shift 2 starts
+        } else if (isInShift3) {
+            timeToInactive = 0;
+            timeToActive = timeRemaining - 55; // time until shift 4 starts
+        }
+
+    } else {
+        // This alliance is active in shifts 1 & 3, inactive in shifts 2 & 4
+        isHubActive = isInShift1 || isInShift3;
+        if (isInShift1) {
+            timeToInactive = timeRemaining - 105;
+            timeToActive = 0;
+        } else if (isInShift3) {
+            timeToInactive = timeRemaining - 55;
+            timeToActive = 0;
+        } else if (isInShift2) {
+            timeToInactive = 0;
+            timeToActive = timeRemaining - 80; // time until shift 3 starts
+        } else if (isInShift4) {
+            timeToInactive = 0;
+            timeToActive = timeRemaining - 30; // never actually becomes active, so 0 might be better here
+        }
     }
 
-    // if (isInactiveFirst && (isInShift2 || isInShift4)) {
-    //   isHubActive = true;
-    // } else if (!isInactiveFirst && (isInShift1 || isInShift3)) {
-    //   isHubActive = true;
-    // } else {
-    //   isHubActive = false;
-    // }
-
-    // Store active status on Network Tables
     NetworkTableInstance.getDefault()
         .getTable("TREAD_Dashboard")
         .getEntry("hubStatus").setBoolean(isHubActive);
-    // Store time-to-active and time-to-inactive on Network Tables
     NetworkTableInstance.getDefault()
         .getTable("TREAD_Dashboard")
         .getEntry("timeToActive").setDouble(timeToActive);
     NetworkTableInstance.getDefault()
         .getTable("TREAD_Dashboard")
         .getEntry("timeToInactive").setDouble(timeToInactive);
-  }
+}
 }
