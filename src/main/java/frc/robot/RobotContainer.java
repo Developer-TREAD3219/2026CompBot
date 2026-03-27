@@ -20,6 +20,7 @@ import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.IndexerSubsystem;
 import frc.robot.subsystems.IntakeArmSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
+import frc.robot.subsystems.LEDSubsystem;
 import frc.robot.subsystems.LauncherSubsystem;
 import frc.robot.subsystems.LimeLightSubsystem;
 import frc.robot.subsystems.TurretSubsystem;
@@ -60,6 +61,7 @@ public class RobotContainer {
         private final IndexerSubsystem m_robotIndexer;
         private final LauncherSubsystem m_launcherSubsystem;
         private final LauncherHoodSubsystem m_launcherHoodSubsystem;
+        public LEDSubsystem m_ledSubsystem;
 
         //Elastic chooser for autos
         private SendableChooser<Command> m_autoChooser;
@@ -92,6 +94,7 @@ public class RobotContainer {
                 m_launcherSubsystem = new LauncherSubsystem(m_currentState);
                 m_robotIndexer = new IndexerSubsystem();
                 m_launcherHoodSubsystem = new LauncherHoodSubsystem();
+                m_ledSubsystem = new LEDSubsystem(m_currentState);
 
                 //set up rumble helpers
                 //m_driverRumble = new RumbleHelper(m_driverController);

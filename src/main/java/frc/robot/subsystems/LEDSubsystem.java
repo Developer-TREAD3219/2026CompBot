@@ -115,6 +115,7 @@ public class LEDSubsystem extends SubsystemBase {
             System.out.println("Size of map" + m_patternMap.size());
             m_UserButton = false;
         }
+        System.out.println("Current State: " + m_currentState.getState());
         m_patternMap.get(m_currentState.getState()).applyTo((m_buffer));
         m_led.setData(m_buffer);
     }
