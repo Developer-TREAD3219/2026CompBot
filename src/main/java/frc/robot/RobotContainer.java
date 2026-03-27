@@ -25,7 +25,7 @@ import frc.robot.subsystems.LimeLightSubsystem;
 import frc.robot.subsystems.TurretSubsystem;
 import frc.robot.subsystems.LauncherHoodSubsystem;
 import frc.robot.commands.TurretCommands.SimpleAim;
-//import frc.robot.utils.RumbleHelper;
+import frc.robot.utils.RumbleHelper;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -81,8 +81,8 @@ public class RobotContainer {
         private final CommandXboxController m_gunnerController = new CommandXboxController(
                         OIConstants.kGunnerControllerPort);
 
-        // private final RumbleHelper m_driverRumble;
-        // private final RumbleHelper m_gunnerRumble;
+        private final RumbleHelper m_driverRumble;
+        private final RumbleHelper m_gunnerRumble;
 
 
         /**
@@ -105,8 +105,8 @@ public class RobotContainer {
                 m_launcherHoodSubsystem = new LauncherHoodSubsystem();
 
                 //set up rumble helpers
-                //m_driverRumble = new RumbleHelper(m_driverController);
-                //m_gunnerRumble = new RumbleHelper(m_gunnerController);
+                m_driverRumble = new RumbleHelper(m_driverController);
+                m_gunnerRumble = new RumbleHelper(m_gunnerController);
 
                 setUpAutoCommands();
 
@@ -175,37 +175,38 @@ public class RobotContainer {
                 .onTrue(new InstantCommand(() -> m_currentState.setState(State.TargetAcquired)))
                 .onFalse(new InstantCommand(() -> m_currentState.setState(State.NoTarget)));
         
+                // get the time to inactive
+                NetworkTableEntry timeToInactive = NetworkTableInstance.getDefault()
+                    .getTable("TREAD_Dashboard")
+                    .getEntry("timeToInactive");
                 
-                // // get the time to inactive
-                // NetworkTableEntry timeToInactive = NetworkTableInstance.getDefault()
-                //     .getTable("TREAD_Dashboard")
-                //     .getEntry("timeToInactive");
-                
-                // NetworkTableEntry timeToActive = NetworkTableInstance.getDefault()
-                //     .getTable("TREAD_Dashboard")
-                //     .getEntry("timeToActive");
-                // // Trigger rumble when either transition is within 3 seconds
-                // new Trigger(() -> {
-                //     double toInactive = timeToInactive.getDouble(0);
-                //     double toActive = timeToActive.getDouble(0);
-                //     return (toInactive > 0 && toInactive <= 3.0) 
-                //         || (toActive > 0 && toActive <= 3.0);
-                // })
-                // .onTrue(new InstantCommand(() -> {
-                //     m_driverRumble.rumbleForDuration(0.3, 0.7, 3, 0.8);
-                //     m_gunnerRumble.rumbleForDuration(0.3, 0.7, 3, 0.8);
-                // }));
+                NetworkTableEntry timeToActive = NetworkTableInstance.getDefault()
+                    .getTable("TREAD_Dashboard")
+                    .getEntry("timeToActive");
+
+                // Trigger rumble when either transition is within 3 seconds
+                new Trigger(() -> {
+                    double toInactive = timeToInactive.getDouble(0);
+                    double toActive = timeToActive.getDouble(0);
+                    return (toInactive > 0 && toInactive <= 3.0) 
+                        || (toActive > 0 && toActive <= 3.0);
+                })
+                .onTrue(new InstantCommand(() -> {
+                    m_driverRumble.rumbleForDuration(0.3, 0.7, 3, 0.8);
+                    m_gunnerRumble.rumbleForDuration(0.3, 0.7, 3, 0.8);
+                }));
                 
         }
 
         public void updateRumble() {
-        //     if (m_driverRumble != null) {
-        //         m_driverRumble.update();
-        //     }
-        //     if (m_gunnerRumble != null) {
-        //         m_gunnerRumble.update();
-        //     }
+            if (m_driverRumble != null) {
+                m_driverRumble.update();
+            }
+            if (m_gunnerRumble != null) {
+                m_gunnerRumble.update();
+            }
         }
+
         private boolean isAnyHubTagVisible() {
             RawFiducial[] fiducials = LimelightHelpers.getRawFiducials(VisionConstants.kCameraName);
             if (fiducials == null) return false;
