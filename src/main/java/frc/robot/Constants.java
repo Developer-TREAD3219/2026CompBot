@@ -197,7 +197,7 @@ public final class Constants {
   }
 
   public static final class LedConstants {
-    public static final int kPwmPort = 9;
+    public static final int kPwmPort = 0;
     public static final int kTotalLeds = 39 + 25;
   }
 
@@ -275,17 +275,19 @@ public final class Constants {
   }
 
   public static final class ShootingConstants {
-    // Lookup table mapping distance (meters) to launcher throttle and hood setpoint.
+    // Lookup table mapping distance (meters) to launcher throttle and hood
+    // setpoint.
     // Distances MUST be in ascending order.
     // Hood setpoint is normalized [0 = fully retracted, 1 = fully extended].
     // Tune these values on the practice field.
-    public static final double[] kDistanceMeters = { 1.5,  2.0,  2.5,  3.0,  3.5,  4.0  };
-    public static final double[] kThrottleValues  = { 0.50, 0.55, 0.60, 0.65, 0.70, 0.75 };
-    public static final double[] kHoodAngles      = { 0.20, 0.35, 0.50, 0.65, 0.80, 1.00 };
+    public static final double[] kDistanceMeters = { 1.5, 2.0, 2.5, 3.0, 3.5, 4.0 };
+    public static final double[] kThrottleValues = { 0.50, 0.55, 0.60, 0.65, 0.70, 0.75 };
+    public static final double[] kHoodAngles = { 0.20, 0.35, 0.50, 0.65, 0.80, 1.00 };
 
     /**
      * Finds where 'distance' falls between two entries in the distance table,
-     * then returns a proportionally blended value from the corresponding output table.
+     * then returns a proportionally blended value from the corresponding output
+     * table.
      * If distance is outside the table range, returns the nearest endpoint value.
      */
     public static double interpolate(double[] distanceTable, double[] outputTable, double distance) {
@@ -302,8 +304,8 @@ public final class Constants {
         if (distance <= distanceTable[i]) {
           double lowerDistance = distanceTable[i - 1];
           double upperDistance = distanceTable[i];
-          double lowerOutput   = outputTable[i - 1];
-          double upperOutput   = outputTable[i];
+          double lowerOutput = outputTable[i - 1];
+          double upperOutput = outputTable[i];
           // How far between the two entries (0 = at lower, 1 = at upper)
           double fraction = (distance - lowerDistance) / (upperDistance - lowerDistance);
           return lowerOutput + fraction * (upperOutput - lowerOutput);
