@@ -8,24 +8,24 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 0.6169204083651252,
-        "y": 4.66785577488259
+        "x": 1.2150222222222222,
+        "y": 5.014316666666666
       },
       "isLocked": false,
-      "linkedName": "startShoot"
+      "linkedName": "shooting over"
     },
     {
       "anchor": {
-        "x": 0.8570327657752654,
-        "y": 4.789977603191044
+        "x": 0.5085500000000003,
+        "y": 4.84866111111111
       },
       "prevControl": {
-        "x": 1.0894041767693874,
-        "y": 4.933522000935584
+        "x": 0.7539949626475707,
+        "y": 4.8961665877525755
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "betterbot67"
+      "linkedName": "another"
     }
   ],
   "rotationTargets": [],
@@ -48,7 +48,7 @@
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -18.858308946833372
+    "rotation": -19.6442643476077
   },
   "useDefaultConstraints": false
 }

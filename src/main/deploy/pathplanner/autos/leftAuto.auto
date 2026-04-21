@@ -65,6 +65,12 @@
           }
         },
         {
+          "type": "path",
+          "data": {
+            "pathName": "startClimb"
+          }
+        },
+        {
           "type": "named",
           "data": {
             "name": "retractClimber"

@@ -279,9 +279,9 @@ public final class Constants {
     // Distances MUST be in ascending order.
     // Hood setpoint is normalized [0 = fully retracted, 1 = fully extended].
     // Tune these values on the practice field.
-    public static final double[] kDistanceMeters = { 1.5,  2.0,  2.5,  3.0,  3.5,  4.0  };
-    public static final double[] kThrottleValues  = { 0.50, 0.55, 0.60, 0.65, 0.70, 0.75 };
-    public static final double[] kHoodAngles      = { 0.20, 0.35, 0.50, 0.65, 0.80, 1.00 };
+    public static final double[] kDistanceMeters = { 1.5,  2.0,  2.5,  3.0,  3.5,  4.0, 4.5, 5.0, 5.5  };
+    public static final double[] kThrottleValues  = { 0.45, 0.50, 0.51, 0.55, 0.55, 0.58, 0.61, 0.65, 0.70 };
+    public static final double[] kHoodAngles      = { 0.0, 0.0, 0.10, 0.15, 0.20, 0.025, 0.30, 0.34, 0.38 };
 
     /**
      * Finds where 'distance' falls between two entries in the distance table,

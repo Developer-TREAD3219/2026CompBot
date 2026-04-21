@@ -8,7 +8,7 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.519305124041528,
+        "x": 1.5193051240415283,
         "y": 5.114274283265043
       },
       "isLocked": false,
@@ -25,7 +25,7 @@
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "startShoot"
+      "linkedName": "shooting over"
     }
   ],
   "rotationTargets": [],
@@ -49,7 +49,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -18.858308946833372
+    "rotation": -19.6442643476077
   },
   "reversed": false,
   "folder": null,

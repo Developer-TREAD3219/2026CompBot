@@ -94,6 +94,7 @@ public class LauncherHoodSubsystem extends SubsystemBase {
     double manualSetpoint = SmartDashboard.getNumber("Hood Manual Setpoint", 0.0);
 
     if (manualMode) {
+      SmartDashboard.getNumber("HoodSetpoint", manualSetpoint);
       m_hoodPID.setSetpoint(minSetpoint + (PWMrange * manualSetpoint));
       m_hoodController.set(-m_hoodPID.calculate(currentPosition));
       SmartDashboard.putNumber("hoodPID", m_hoodPID.calculate(currentPosition));
