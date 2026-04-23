@@ -94,6 +94,36 @@ public class DriveSubsystem extends SubsystemBase {
         new Pose2d());
 
     SmartDashboard.putData("Field", m_field);
+    
+    //swerve data for dashboard widget.
+    SmartDashboard.putData("Swerve",
+        builder -> {
+          builder.setSmartDashboardType("SwerveDrive");
+
+          builder.addDoubleProperty(
+              "Front Left Angle", () -> m_frontLeft.getPosition().angle.getRadians(), null);
+          builder.addDoubleProperty(
+              "Front Left Velocity", () -> m_frontLeft.getState().speedMetersPerSecond, null);
+
+          builder.addDoubleProperty(
+              "Front Right Angle", () -> m_frontRight.getState().angle.getRadians(), null);
+          builder.addDoubleProperty(
+              "Front Right Velocity", () ->m_frontRight.getState().speedMetersPerSecond, null);
+
+          builder.addDoubleProperty(
+              "Back Left Angle", () -> m_rearLeft.getState().angle.getRadians(), null);
+          builder.addDoubleProperty(
+              "Back Left Velocity", () -> m_rearLeft.getState().speedMetersPerSecond, null);
+
+          builder.addDoubleProperty(
+              "Back Right Angle", () -> m_rearRight.getState().angle.getRadians(), null);
+          builder.addDoubleProperty(
+              "Back Right Velocity", () -> m_rearRight.getState().speedMetersPerSecond, null);
+
+          builder.addDoubleProperty(
+              "Robot Angle", () -> (getHeading())*(Math.PI / 180), null);
+        });
+
 
     // -------------------------------------------------------
     // PathPlanner AutoBuilder configuration (must be last)

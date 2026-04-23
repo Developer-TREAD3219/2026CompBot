@@ -128,6 +128,11 @@ public static void updateHubStatus(Boolean isInactiveFirst) {
         .getEntry("timeToActive").setDouble(timeToActive);
     NetworkTableInstance.getDefault()
         .getTable("TREAD_Dashboard")
-        .getEntry("timeToInactive").setDouble(timeToInactive);
-}
+        .getEntry("timeToInactive").setDouble(timeToInactive);  
+  }
+  public static void getMatchTime() {
+    NetworkTableInstance.getDefault()
+        .getTable("TREAD_Dashboard")
+        .getEntry("matchTime").setDouble(DriverStation.getMatchTime());
+  }
 }

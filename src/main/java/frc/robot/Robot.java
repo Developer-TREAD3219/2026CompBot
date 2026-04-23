@@ -81,6 +81,7 @@ public class Robot extends TimedRobot {
     }
     AllianceHelpers.updateHubStatus(m_isInactiveFirst);
     m_robotContainer.updateRumble();
+    AllianceHelpers.getMatchTime();
   }
 
   @Override
