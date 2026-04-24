@@ -2,6 +2,36 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
+/* TODO: Make an actual planned dashboard for elastic
+        1. Reorganize the network tables take things out of Smart Dashboard and put them in categories using the old network tables methodology
+        2. Plan Categories for the network table. Things like "override commands" and "Telemetry"
+        3. Organize and **EXPORT** elastic on a computer. We should probably have a main competition screen, a demo screen for running the bot at out reach and a testing screen*/
+
+/* TODO: Print statements while easy to implement are less then ideal for a couple reasons. We should learn how logging works, and remove any remaing prints*/
+
+/* TODO: Angleify the aim
+        1. Make a method that converts the encoder measuerment to an angle and vis versa
+        2. Make a method somewhere that returns the dif between the bots orientation and the angle of the hug
+        3. Make a method that determines the angle from the bot to the hub
+        4. Write a command that uses the above to aim the turret*/
+
+/* TODO: Add a passing mode*/
+
+/* TODO: Revaluate the gunner controls. I dont' think we need all those reverses that we rarely if ever use*/
+
+/* TODO: Look into refactoring the pose estimator into its own class*/
+
+/* TODO: Identify files that should be copied into a template for next years bot
+        1. Drive
+        2. LL and Pose estimation
+        3. General Structure of the Robot Container Constructor and Methods
+        4. The LED Subsystem and its asociated state machine*/
+
+/* TODO: Implement the rumble helpers class*/
+
+/* TODO: Come up with more TODOs*/
+
+
 package frc.robot;
 
 // imports for Rev Robotics MaxSwerve
